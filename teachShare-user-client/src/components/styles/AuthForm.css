@@ -1,0 +1,120 @@
+/* AuthForm.css */
+.auth-form-card {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    direction: rtl;
+  }
+  
+  .auth-form-title {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .auth-form-toggle {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+  
+  .toggle-btn {
+    flex: 1;
+    padding: 0.8rem;
+    background: none;
+    border: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .toggle-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+  }
+  
+  .auth-form {
+    width: 100%;
+  }
+  
+  .form-group {
+    margin-bottom: 1.2rem;
+    width: 100%;
+  }
+  
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .form-row .form-group {
+    margin-bottom: 0;
+    flex: 1;
+  }
+  
+  .auth-form input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.3s;
+  }
+  
+  .auth-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+  }
+  
+  .submit-btn:hover {
+    background-color: #3a5883;
+  }
+  
+  .submit-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .switch-mode-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.9rem;
+  }
+  
+  .switch-mode-btn:hover {
+    text-decoration: underline;
+  }
