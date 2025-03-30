@@ -17,21 +17,16 @@ namespace TeachShare.Core.Entities
         [StringLength(100)]
         public string Name { get; set; }
 
-        public string? Description { get; set; }
+        public string Description { get; set; }
 
-        [StringLength(50)]
-        //public string Color { get; set; } // הוספת צבע לתצוגה
+        public DateTime CreatedDate { get; set; }
 
-        //[StringLength(100)]
-        //public string Icon { get; set; } // הוספת אייקון
+        public DateTime? ModifiedDate { get; set; }
 
-        public bool IsPublic { get; set; } = false;
+        public DateTime? DeletedDate { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow; // הוספת תאריך עדכון אחרון
+        public bool IsDeleted { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         //[Key]
         //public int CollectionId { get; set; } // מספר מזהה ייחודי
@@ -57,9 +52,9 @@ namespace TeachShare.Core.Entities
         public int? ParentCollectionId { get; set; } // מפתח זר לאוסף ההורה
         public virtual Collection ParentCollection { get; set; } // אוסף ההורה
 
-        public virtual ICollection<Collection> SubCollections { get; set; } = new List<Collection>();
+        public virtual ICollection<Collection> SubCollections { get; set; } //= new List<Collection>();
         
-        public virtual ICollection<Material> Materials { get; set; } = new List<Material>(); 
+        public virtual ICollection<Material> Materials { get; set; }// = new List<Material>(); 
     }
 
 }

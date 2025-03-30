@@ -53,51 +53,38 @@ namespace TeachShare.Core.Entities
         [Key]
         public int Id { get; set; }
 
-
         [Required]
         [StringLength(255)]
-        public string Title { get; set; }
-
-        public string Description { get; set; }
-
-        [Required]
-        [StringLength(255)]
-        public string FilePath { get; set; }
-
-        public int FileSize { get; set; }
-
-        [StringLength(50)]
-        public string FileType { get; set; }
+        public string Name { get; set; }
 
         [StringLength(255)]
-        public string ThumbnailPath { get; set; } // הוספת שדה לתמונה ממוזערת
+        public string Type { get; set; }
 
-        [StringLength(20)]
-        public string Language { get; set; } // הוספת שדה שפה
+        public long Size { get; set; }
 
-        [StringLength(50)]
-        public string GradeLevel { get; set; } // הוספת שדה שכבת גיל ספציפית
+        [StringLength(512)]
+        public string AwsUrl { get; set; }
 
-        public int? Duration { get; set; } // משך זמן משוער בדקות (למערכי שיעור)
+        [StringLength(512)]
+        public string S3Key { get; set; }
 
-        public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedDate { get; set; }
 
-        public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow;
+        public DateTime? ModifiedDate { get; set; }
 
-        public bool IsPublic { get; set; } = true; // שינוי ברירת המחדל לציבורי
+        public DateTime? DeletedDate { get; set; }
 
-        public int DownloadCount { get; set; } = 0;
+        public bool IsDeleted { get; set; }
 
-        public int ViewCount { get; set; } = 0;
 
-        public float AverageRating { get; set; } = 0;
-
-        [StringLength(20)]
-        public string Status { get; set; } = "active"; // הוספת סטטוס (פעיל/בבדיקה/בארכיון)
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        //[Key]
+        //public string Name { get; set; }
+        //public string Type { get; set; }
+        //public long Size { get; set; }
+        //public string AWSUrl { get; set; }
+        //public DateTime CreatedDate { get; set; }
+        //public int CollectionId { get; set; } // זיהוי התיקייה שהקובץ שייך אליה
+        //public int UserId { get; set; }
+        ////[Key]
         //public int MaterialId { get; set; } // מספר מזהה ייחודי
 
         //[Required]
@@ -134,12 +121,14 @@ namespace TeachShare.Core.Entities
 
         //// קשרים
         public int UserId { get; set; }
-        public virtual User User { get; set; } // המשתמש שהעלה את החומר
+        public virtual User User { get; set; } //המשתמש שהעלה את החומר
+        public int? CollectionID { get; set; }//
+        public Collection collection { get; set; }
         public virtual ICollection<Rating> Ratings { get; set; } // דירוגים לחומר
         public virtual ICollection<Tag> Tags { get; set; } // תגיות שקשורות לחומר
         public virtual ICollection<Category> Categories { get; set; } // קטגוריות שקשורות לחומר
 
-        public virtual ICollection<Collection> Collections { get; set; } = new List<Collection>();
+        //public virtual ICollection<Collection> Collections { get; set; } = new List<Collection>();
     }
 
 }

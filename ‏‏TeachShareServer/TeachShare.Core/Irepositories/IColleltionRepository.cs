@@ -9,8 +9,7 @@ namespace TeachShare.Core.Irepositories
 {
     public interface IColleltionRepository: IRepositoryGeneric<Collection>
     {
-            Task<IEnumerable<Collection>> GetRootCollectionsAsync(int userId);
-            Task<IEnumerable<Collection>> GetSubCollectionsAsync(int parentCollectionId);
-        
+        Task<IEnumerable<Collection>> GetRootCollectionsAsync(int userId);
+        Task<IEnumerable<Collection>> GetSubCollectionsAsync(int parentId);
     }
 }

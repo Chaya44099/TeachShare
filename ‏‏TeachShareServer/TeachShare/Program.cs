@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore; // הוספת using עבור DbContext
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -13,22 +13,53 @@ using TeachShare.Core.Iservices;
 using TeachShare.Data;
 using TeachShare.Data.Repository;
 using TeachShare.Service.Services;
+using Amazon.S3;
+using Amazon.Runtime;
+using Amazon;
+using Amazon.Extensions.NETCore.Setup;
 
 var builder = WebApplication.CreateBuilder(args);
+//var credentials = new BasicAWSCredentials(
+//    builder.Configuration["AWS:AccessKey"],
+//    builder.Configuration["AWS:SecretKey"]
+//);
+//var region = Amazon.RegionEndpoint.GetBySystemName(builder.Configuration["AWS:Region"]); // בדקי שהאזור נכון
 
-// הוספת DataContext
+//var s3Client = new AmazonS3Client(credentials, region);
+
+//builder.Services.AddSingleton<IAmazonS3>(s3Client);
+// AWS S3 Configuration
+//builder.Services.AddSingleton<IAmazonS3>(sp =>
+//{
+//    var awsConfig = builder.Configuration.GetSection("AWS");
+//    var credentials = new BasicAWSCredentials(
+//        awsConfig["AccessKey"],
+//        awsConfig["SecretKey"]
+//    );
+
+//    var regionEndpoint = RegionEndpoint.GetBySystemName(awsConfig["Region"]);
+
+//    return new AmazonS3Client(credentials, regionEndpoint);
+//});
+//builder.Services.AddAWSService<IAmazonS3>();
+// Add bucket name as a singleton service for easy injectionמה זה???
+//builder.Services.AddSingleton(sp =>
+//    builder.Configuration.GetValue<string>("AWS:BucketName")
+//);
+
+// DataContext Configuration
 builder.Services.AddDbContext<DataContext>(options =>
-        options.UseSqlServer("Data Source=DESKTOP-SSNMLFD;Initial Catalog=TeachShare;Integrated Security=true;TrustServerCertificate=true;"));
-;
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-// הוספת שירותים לתוך הקונטיינר
+// Dependency Injection for Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
 builder.Services.AddScoped<IColleltionRepository, CollectionRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IMetirialRepository, MaterialRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
+
+// Dependency Injection for Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
@@ -36,25 +67,31 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.AddAutoMapper(typeof(MappingProfile),typeof(UserPostModel));
 
-// הוספת CORS
+// AutoMapper Configuration
+builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(UserPostModel));
+
+// CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        //policy.WithOrigins("http://localhost:3000", "http://localhost:3001") // הוספת גם את 3001
+        //      .AllowAnyMethod()
+        //      .AllowAnyHeader()
+        //      .AllowCredentials();
+        policy.SetIsOriginAllowed(_ => true)
+        .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+    });
 });
-
-// הגדרת בקרים (Controllers)
+// Controllers Configuration
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
-// הגדרת Swagger
+// Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -83,27 +120,41 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Authentication Configuration
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["JWT:Issuer"],
-            ValidAudience = builder.Configuration["JWT:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
-        };
-    });
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidAudience = builder.Configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+    };
+});
+builder.Services.AddDefaultAWSOptions(new AWSOptions
+{
+    Credentials = new BasicAWSCredentials(
+        builder.Configuration["AWS:AccessKey"],
+        builder.Configuration["AWS:SecretKey"]
+    ),
+    Region = RegionEndpoint.GetBySystemName(builder.Configuration["AWS:Region"])
+});
+
+// רישום שירות S3
+builder.Services.AddAWSService<IAmazonS3>();
+
 
 var app = builder.Build();
 
+// Swagger and Development Configuration
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
@@ -115,12 +166,12 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     });
 }
 
-app.UseCors("AllowAll");
+// Middleware Configuration
+
 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 app.UseHttpsRedirection();
-
+app.UseCors("AllowReactApp");
 app.UseAuthentication();
-
 app.UseAuthorization();
 app.MapControllers();
 

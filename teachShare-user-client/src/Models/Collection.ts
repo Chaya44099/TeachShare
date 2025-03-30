@@ -1,33 +1,50 @@
-export interface Material {
-  id: number;
-  name: string;
-  type: string;
-  size?: number;
-  createdDate: Date;
-  updatedDate: Date;
-  // שדות נוספים לפי הצורך
-}
-
+// מודל לתיקייה
 export interface Collection {
   id: number;
   name: string;
   description?: string;
-  isPublic: boolean;
-  createdDate: Date;
-  lastUpdateDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: number;
+  createdDate: string;
+  lastUpdatedDate?: string;
   parentCollectionId?: number | null;
-  subCollections: Collection[];
-  materials: Material[];
+  userId: number;
+  isPublic: boolean;
+  subCollections?: Collection[];
+  materials?: Material[];
 }
 
-// ממשק לשליחת מידע ליצירת תיקייה חדשה
+// מודל לקובץ
+export interface Material {
+  id: number;
+  name: string;
+  type: string;
+  size: number;
+  createdDate: string;
+  lastUpdatedDate?: string;
+  collectionID: number;
+  userId: number;
+  awsUrl: string;
+  s3Key: string;
+}
+
+// DTO ליצירת תיקייה
 export interface CreateCollectionDto {
   name: string;
   description?: string;
-  isPublic?: boolean;
-  userId: number;
   parentCollectionId?: number | null;
+  userId: number | null;
+  isPublic: boolean;
+}
+
+// DTO ליצירת קובץ
+export interface MaterialDTO {
+  id?: number;
+  name: string;
+  type: string;
+  size: number;
+  createdDate?: string;
+  lastUpdatedDate?: string;
+  collectionID: number;
+  userId: number;
+  awsUrl: string;
+  s3Key: string;
 }

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
+using Amazon.S3;
+using Amazon.S3.Model;
 using TeachShare.Core.DTOs;
 using TeachShare.Core.Iservices;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TeachShare.Api.Controllers
 {
@@ -11,10 +13,12 @@ namespace TeachShare.Api.Controllers
     public class MaterialController : ControllerBase
     {
         private readonly IMaterialService _materialService;
+        private readonly IAmazonS3 _s3Client;
 
-        public MaterialController(IMaterialService materialService)
+        public MaterialController(IMaterialService materialService, IAmazonS3 s3Client)
         {
             _materialService = materialService;
+            _s3Client = s3Client;
         }
 
         [HttpGet]
@@ -35,34 +39,150 @@ namespace TeachShare.Api.Controllers
             return Ok(material);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<MaterialDTO>> CreateMaterial(MaterialDTO materialDto)
+        [HttpGet("folder/{folderId}")]
+        public async Task<ActionResult<IEnumerable<MaterialDTO>>> GetMaterialsByFolder(int folderId)
         {
-            var createdMaterial = await _materialService.CreateMaterialAsync(materialDto);
-            return CreatedAtAction(nameof(GetMaterialById), new { id = createdMaterial.Id }, createdMaterial);
+            var materials = await _materialService.GetMaterialsByFolderAsync(folderId);
+            return Ok(materials);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<MaterialDTO>> UpdateMaterial(int id, MaterialDTO materialDto)
+        [HttpGet("presigned-url")]
+        public ActionResult GetPresignedUrl(
+            [FromQuery] string fileName,
+            [FromQuery] string contentType)
         {
-            if (id != materialDto.Id)
+            try
             {
-                return BadRequest("Material ID mismatch");
-            }
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = "myteacherbubket.testpnoren",
+                    Key = fileName,
+                    Verb = HttpVerb.PUT,
+                    Expires = DateTime.UtcNow.AddMinutes(50),
+                    ContentType = contentType
+                };
 
-            var updatedMaterial = await _materialService.UpdateMaterialAsync(materialDto);
-            return Ok(updatedMaterial);
+                string url = _s3Client.GetPreSignedURL(request);
+                return Ok(new { url });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "שגיאה ביצירת כתובת", error = ex.Message });
+            }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMaterial(int id)
+        [HttpGet("download-url")]
+        public ActionResult GetDownloadUrl([FromQuery] string fileName)
         {
-            var result = await _materialService.DeleteMaterialAsync(id);
-            if (!result)
+            try
             {
-                return NotFound();
+                var fileKey = fileName;
+                string contentType = GetContentType(Path.GetExtension(fileName));
+
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = "myteacherbubket.testpnoren",
+                    Key = fileKey,
+                    Verb = HttpVerb.GET,
+                    Expires = DateTime.UtcNow.AddMinutes(5),
+                    ResponseHeaderOverrides = new ResponseHeaderOverrides
+                    {
+                        ContentType = contentType,
+                        // קידוד השם של הקובץ ל-UTF-8
+                        ContentDisposition = "attachment; filename*=UTF-8''" + Uri.EscapeDataString(Path.GetFileName(fileName))
+                    }
+                };
+
+                string url = _s3Client.GetPreSignedURL(request);
+                return Ok(new { url });
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "שגיאה ביצירת כתובת", error = ex.Message });
+            }
+        }
+
+        [HttpGet("view-url")]
+        public ActionResult GetViewUrl([FromQuery] string fileName)
+        {
+            try
+            {
+                var fileKey = fileName;
+                string contentType = GetContentType(Path.GetExtension(fileName));
+
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = "myteacherbubket.testpnoren",
+                    Key = fileKey,
+                    Verb = HttpVerb.GET,
+                    Expires = DateTime.UtcNow.AddMinutes(5),
+                    ResponseHeaderOverrides = new ResponseHeaderOverrides
+                    {
+                        ContentType = contentType
+                        // ללא ContentDisposition כדי שהדפדפן יציג את הקובץ במקום להוריד אותו
+                    }
+                };
+
+                string url = _s3Client.GetPreSignedURL(request);
+                return Ok(new { url });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "שגיאה ביצירת כתובת צפייה", error = ex.Message });
+            }
+        }
+
+        // Helper method to get content type based on file extension
+        private string GetContentType(string extension)
+        {
+            switch (extension.ToLower())
+            {
+                case ".pdf":
+                    return "application/pdf";
+                case ".docx":
+                    return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                case ".doc":
+                    return "application/msword";
+                case ".xlsx":
+                    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                case ".xls":
+                    return "application/vnd.ms-excel";
+                case ".txt":
+                    return "text/plain";
+                case ".png":
+                    return "image/png";
+                case ".jpg":
+                    return "image/jpeg";
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".gif":
+                    return "image/gif";
+                case ".svg":
+                    return "image/svg+xml";
+                case ".webp":
+                    return "image/webp";
+                default:
+                    return "application/octet-stream"; // Default binary stream
+            }
+        }
+
+        [HttpPost("save-file-info")]
+        public async Task<ActionResult<MaterialDTO>> SaveFileInfo([FromBody] MaterialDTO material)
+        {
+            if (material == null)
+            {
+                return BadRequest("Material data is required.");
+            }
+
+            var createdMaterial = await _materialService.CreateMaterialAsync(material);
+            return Ok(createdMaterial);
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<MaterialDTO>>> GetFilesByOwner(int userId)
+        {
+            var files = await _materialService.GetFilesByOwnerAsync(userId);
+            return Ok(files);
         }
     }
 }

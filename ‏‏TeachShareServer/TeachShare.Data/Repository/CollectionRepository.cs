@@ -69,15 +69,15 @@ public class CollectionRepository : IColleltionRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Collection>> GetAllAsync()
-    {
-        return await _context.Collections.ToListAsync();
-    }
+    //    public async Task<IEnumerable<Collection>> GetAllAsync()
+    //    {
+    //        return await _context.Collections.ToListAsync();
+    //    }
 
-    public async Task<Collection> GetByIdAsync(int id)
-    {
-        return await _context.Collections.FindAsync(id);
-    }
+    //    public async Task<Collection> GetByIdAsync(int id)
+    //    {
+    //        return await _context.Collections.FindAsync(id);
+    //    }
 
     public async Task<Collection> AddAsync(Collection entity)
     {
@@ -85,35 +85,82 @@ public class CollectionRepository : IColleltionRepository
         return entity;
     }
 
-    public async Task<Collection> UpdateAsync(int id, Collection entity)
-    {
-        var existingEntity = await GetByIdAsync(id);
-        if (existingEntity == null) throw new Exception("Collection not found");
+    //    public async Task<Collection> UpdateAsync(int id, Collection entity)
+    //    {
+    //        var existingEntity = await GetByIdAsync(id);
+    //        if (existingEntity == null) throw new Exception("Collection not found");
 
-        _context.Entry(existingEntity).CurrentValues.SetValues(entity);
-        return existingEntity;
+    //        _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+    //        return existingEntity;
+    //    }
+
+    //    public async Task<bool> DeleteAsync(int id)
+    //    {
+    //        var entity = await GetByIdAsync(id);
+    //        if (entity == null) return false;
+
+    //        _context.Collections.Remove(entity);
+    //        return true;
+    //    }
+
+    //    public async Task<IEnumerable<Collection>> GetRootCollectionsAsync(int userId)
+    //    {
+    //        return await _context.Collections
+    //            .Where(c => c.ParentCollectionId == null && c.UserId == userId)
+    //            .ToListAsync();
+    //    }
+
+    //    public async Task<IEnumerable<Collection>> GetSubCollectionsAsync(int parentCollectionId)
+    //    {
+    //        return await _context.Collections
+    //            .Where(c => c.ParentCollectionId == parentCollectionId)
+    //            .ToListAsync();
+    //    }
+    //}
+    public  async Task<IEnumerable<Collection>> GetAllAsync()
+    {
+        return await _context.Collections
+            .Where(c => !c.IsDeleted)
+            .ToListAsync();
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public  async Task<Collection> GetByIdAsync(int id)
     {
-        var entity = await GetByIdAsync(id);
-        if (entity == null) return false;
-
-        _context.Collections.Remove(entity);
-        return true;
+        return await _context.Collections
+            .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
     }
 
     public async Task<IEnumerable<Collection>> GetRootCollectionsAsync(int userId)
     {
         return await _context.Collections
-            .Where(c => c.ParentCollectionId == null && c.UserId == userId)
+            .Where(c => c.UserId == userId && c.ParentCollectionId == null && !c.IsDeleted)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Collection>> GetSubCollectionsAsync(int parentCollectionId)
+    public async Task<IEnumerable<Collection>> GetSubCollectionsAsync(int parentId)
     {
         return await _context.Collections
-            .Where(c => c.ParentCollectionId == parentCollectionId)
+            .Where(c => c.ParentCollectionId == parentId && !c.IsDeleted)
             .ToListAsync();
+    }
+
+    public  async Task<bool> DeleteAsync(int id)
+    {
+        var collection = await GetByIdAsync(id);
+        if (collection == null) return false;
+
+        // Soft delete
+        collection.IsDeleted = true;
+        collection.DeletedDate = System.DateTime.UtcNow;
+        _context.Collections.Update(collection);
+
+        return true;
+    }
+
+  
+
+    public Task<Collection> UpdateAsync(int id, Collection entity)
+    {
+        throw new NotImplementedException();
     }
 }

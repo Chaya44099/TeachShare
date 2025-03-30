@@ -13,6 +13,7 @@ import {
     selectLoading,
     selectFolderCache
 } from '../slices/CollectionSlice';
+import { setCurrentFiles } from '../slices/MaterialSlice';
 import { Collection, CreateCollectionDto } from '../Models/Collection';
 import './styles/FoldersPanel.css';
 import { AppDispatch } from '../store';
@@ -43,7 +44,6 @@ const FoldersPanel: React.FC = () => {
         } else {
             console.log("User not found in sessionStorage.");
         }
-
     }, [dispatch]);
 
     // מציג את התיקיות המתאימות (שורש או תת-תיקיות של תיקייה נוכחית)
@@ -67,7 +67,7 @@ const FoldersPanel: React.FC = () => {
                 name: newFolderName,
                 description: newFolderDescription || undefined,
                 parentCollectionId: currentFolder?.id || null,
-                userId: userId, // ה-userId שנשלף מ-sessionStorage
+                userId: userId,
                 isPublic: false
             };
 
@@ -85,23 +85,49 @@ const FoldersPanel: React.FC = () => {
         if (!folderCache[folder.id] && !folder.subCollections?.length) {
             dispatch(fetchSubFolders(folder.id));
         }
+        
+        // אם יש קבצים בתיקייה, עדכן את הקבצים הנוכחיים
+        if (folder.materials && folder.materials.length > 0) {
+            dispatch(setCurrentFiles(folder.materials));
+        } else {
+            dispatch(setCurrentFiles([]));
+        }
     };
 
     // חזרה לתיקיית האב
     const handleBackClick = () => {
         dispatch(navigateBack());
+        
+        // עדכון הקבצים הנוכחיים בהתאם לתיקייה החדשה
+        const parentFolder = breadcrumbs.length > 1 ? breadcrumbs[breadcrumbs.length - 2] : null;
+        if (parentFolder && parentFolder.materials) {
+            dispatch(setCurrentFiles(parentFolder.materials));
+        } else {
+            dispatch(setCurrentFiles([]));
+        }
     };
 
     // חזרה לשורש
     const handleRootClick = () => {
         dispatch(navigateToRoot());
+        dispatch(setCurrentFiles([]));
     };
 
     // ניווט בפירורי לחם
     const handleBreadcrumbClick = (index: number) => {
+        const targetFolder = breadcrumbs[index];
+        
         dispatch(navigateToRoot());
+        
         for (let i = 0; i <= index; i++) {
             dispatch(navigateToFolder(breadcrumbs[i]));
+        }
+        
+        // עדכון הקבצים הנוכחיים
+        if (targetFolder.materials) {
+            dispatch(setCurrentFiles(targetFolder.materials));
+        } else {
+            dispatch(setCurrentFiles([]));
         }
     };
 

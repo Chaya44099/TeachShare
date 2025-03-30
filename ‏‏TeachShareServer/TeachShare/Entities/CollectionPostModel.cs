@@ -2,10 +2,9 @@
 {
     public class CollectionPostModel
     {
-        public int UserId { get; set; } // מזהה המשתמש
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int UserId { get; set; }
         public int? ParentCollectionId { get; set; }
-        public string Name { get; set; } // שם התיקיה
-        public string? Description { get; set; } // תיאור התיקיה
-        public bool IsPublic { get; set; } // האם התיקיה גלוי לכולם
     }
 }
