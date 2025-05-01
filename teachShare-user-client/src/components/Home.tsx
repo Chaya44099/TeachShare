@@ -2,7 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import './styles/Home.css';
+import HomeFeatures from './HomeFeatures';
+import WelcomeSection from './WelcomeSection';
 
+/**
+ * Home - Landing page component.
+ * Displays different content based on authentication status.
+ */
 const Home: React.FC = () => {
   const { isAuthenticated, user } = useSelector((state: any) => state.auth);
 
@@ -23,32 +29,9 @@ const Home: React.FC = () => {
       </section>
 
       {isAuthenticated ? (
-        <section className="welcome-section">
-          <h2>ברוכה הבאה, {user?.firstName || 'משתמשת יקרה'}!</h2>
-          <p>המשיכי לאזור האישי כדי לצפות בחומרים שלך או לחפש חומרים חדשים.</p>
-          <Link to="/dashboard" className="dashboard-link">לאזור האישי</Link>
-        </section>
+        <WelcomeSection user={user} />
       ) : (
-        <section className="features-section">
-          <h2>למה להצטרף ל-TEACH SHARE?</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">📚</div>
-              <h3>אלפי חומרי לימוד</h3>
-              <p>גישה למאגר עשיר של מערכי שיעור, דפי עבודה ומצגות</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">👩‍🏫</div>
-              <h3>קהילת מורות תומכת</h3>
-              <p>שיתוף ידע וניסיון עם מורות מכל רחבי הארץ</p>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon">⏱️</div>
-              <h3>חיסכון בזמן</h3>
-              <p>מצאי חומרים מוכנים או התאימי חומרים קיימים לצרכייך</p>
-            </div>
-          </div>
-        </section>
+        <HomeFeatures />
       )}
     </div>
   );

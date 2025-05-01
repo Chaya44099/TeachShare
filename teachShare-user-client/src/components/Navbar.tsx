@@ -4,6 +4,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../slices/authSlice';
 import './styles/Navbar.css';
 
+/**
+ * Navbar - Main navigation bar for the application.
+ * Shows different links based on authentication status.
+ */
 const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();

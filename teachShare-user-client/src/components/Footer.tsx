@@ -2,6 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import './styles/Footer.css';
 
+/**
+ * Footer - Common footer component displayed on all pages.
+ * Contains navigation links and contact information.
+ */
 const Footer: React.FC = () => {
   return (
     <footer className="footer">
@@ -22,8 +26,8 @@ const Footer: React.FC = () => {
         
         <div className="footer-section">
           <h4>צרו קשר</h4>
-          <p>מייל: info@teachshare.co.il</p>
-          <p>טלפון: 03-1234567</p>
+          <p>מייל: c0556744099@gmail.com</p>
+          <p>טלפון: 0556744099</p>
         </div>
       </div>
       

@@ -1,9 +1,13 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import './styles/Dashboard.css';
-import FoldersPanel from './FolderContents';
-import FilesPanel from './FilesPanel';
+import FoldersPanel from './folders/FoldersPanel';
+import FilesPanel from './files/FilesPanel';
 
+/**
+ * Dashboard - Main user dashboard component.
+ * Contains panels for folder management and file viewing.
+ */
 const Dashboard: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
 
