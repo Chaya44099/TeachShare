@@ -161,10 +161,15 @@ namespace TeachShare.Api.Controllers
                     return "image/svg+xml";
                 case ".webp":
                     return "image/webp";
+                case ".mp3":
+                    return "audio/mpeg"; // Content-Type for MP3 files
+                case ".mp4":
+                    return "video/mp4"; // Content-Type for MP4 files
                 default:
                     return "application/octet-stream"; // Default binary stream
             }
         }
+
 
         [HttpPost("save-file-info")]
         public async Task<ActionResult<MaterialDTO>> SaveFileInfo([FromBody] MaterialDTO material)

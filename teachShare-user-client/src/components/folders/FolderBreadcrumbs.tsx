@@ -1,66 +1,108 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
+import React from "react"
+import { useDispatch } from "react-redux"
+import { navigateToRoot, navigateToFolder } from "../../slices/CollectionSlice"
+import { setCurrentFiles } from "../../slices/MaterialSlice"
+import type { Collection } from "../../Models/Collection"
+import type { AppDispatch } from "../../store"
+import { ChevronLeft, Home, FolderOpen } from "lucide-react"
+import { Button } from "../../components/ui/button"
 import {
-    navigateToRoot,
-    navigateToFolder
-} from '../../slices/CollectionSlice';
-import { setCurrentFiles } from '../../slices/MaterialSlice';
-import { Collection } from '../../Models/Collection';
-import { AppDispatch } from '../../store';
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "../../components/ui/breadcrumb"
+import { motion } from "framer-motion"
 
 interface FolderBreadcrumbsProps {
-    breadcrumbs: Collection[];
+  breadcrumbs: Collection[]
 }
 
 /**
- * FolderBreadcrumbs - Navigation breadcrumbs for folder hierarchy.
+ * FolderBreadcrumbs - נתיב ניווט מודרני להיררכיית תיקיות
  */
 const FolderBreadcrumbs: React.FC<FolderBreadcrumbsProps> = ({ breadcrumbs }) => {
-    const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useDispatch<AppDispatch>()
 
-    // Navigate to root folder
-    const handleRootClick = () => {
-        dispatch(navigateToRoot());
-        dispatch(setCurrentFiles([]));
-    };
+  // ניווט לתיקיית השורש
+  const handleRootClick = () => {
+    dispatch(navigateToRoot())
+    dispatch(setCurrentFiles([]))
+  }
 
-    // Navigate to specific folder in breadcrumb trail
-    const handleBreadcrumbClick = (index: number) => {
-        const targetFolder = breadcrumbs[index];
-        
-        dispatch(navigateToRoot());
-        
-        for (let i = 0; i <= index; i++) {
-            dispatch(navigateToFolder(breadcrumbs[i]));
-        }
-        
-        // Update current files
-        if (targetFolder.materials) {
-            dispatch(setCurrentFiles(targetFolder.materials));
-        } else {
-            dispatch(setCurrentFiles([]));
-        }
-    };
+  // ניווט לתיקייה ספציפית בנתיב
+  const handleBreadcrumbClick = (index: number) => {
+    const targetFolder = breadcrumbs[index]
 
-    return (
-        <div className="breadcrumbs">
-            <button className="breadcrumb-btn" onClick={handleRootClick}>
-                דף הבית
-            </button>
-            {breadcrumbs.map((folder, index) => (
-                <React.Fragment key={folder.id}>
-                    <span className="breadcrumb-separator">{'>'}</span>
-                    <button
-                        className="breadcrumb-btn"
-                        onClick={() => handleBreadcrumbClick(index)}
-                        disabled={index === breadcrumbs.length - 1}
+    dispatch(navigateToRoot())
+
+    for (let i = 0; i <= index; i++) {
+      dispatch(navigateToFolder(breadcrumbs[i]))
+    }
+
+    // עדכון הקבצים הנוכחיים
+    if (targetFolder.materials) {
+      dispatch(setCurrentFiles(targetFolder.materials))
+    } else {
+      dispatch(setCurrentFiles([]))
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white/50 backdrop-blur-sm rounded-lg p-2 mb-4 border border-gray-100 shadow-sm"
+    >
+      <Breadcrumb dir="rtl">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                onClick={handleRootClick}
+              >
+                <Home className="h-3.5 w-3.5 ml-1" />
+                <span>ראשי</span>
+              </Button>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+
+          {breadcrumbs.map((folder, index) => (
+            <React.Fragment key={folder.id}>
+              <BreadcrumbSeparator>
+                <ChevronLeft className="h-4 w-4 text-gray-400" />
+              </BreadcrumbSeparator>
+              <BreadcrumbItem>
+                {index === breadcrumbs.length - 1 ? (
+                  <BreadcrumbPage className="flex items-center gap-1 font-medium">
+                    <FolderOpen className="h-3.5 w-3.5 ml-1 text-emerald-500" />
+                    <span>{folder.name}</span>
+                  </BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1 hover:bg-emerald-50"
+                      onClick={() => handleBreadcrumbClick(index)}
                     >
-                        {folder.name}
-                    </button>
-                </React.Fragment>
-            ))}
-        </div>
-    );
-};
+                      <FolderOpen className="h-3.5 w-3.5 ml-1 text-emerald-500" />
+                      <span>{folder.name}</span>
+                    </Button>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </React.Fragment>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </motion.div>
+  )
+}
 
-export default FolderBreadcrumbs;
+export default FolderBreadcrumbs

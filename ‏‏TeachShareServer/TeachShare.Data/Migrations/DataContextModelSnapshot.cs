@@ -111,7 +111,6 @@ namespace TeachShare.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
@@ -129,6 +128,9 @@ namespace TeachShare.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("iconType")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

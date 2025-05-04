@@ -10,6 +10,7 @@ export interface Collection {
   isPublic: boolean;
   subCollections?: Collection[];
   materials?: Material[];
+  iconType?: number;  
 }
 
 // מודל לקובץ
@@ -30,9 +31,11 @@ export interface Material {
 export interface CreateCollectionDto {
   name: string;
   description?: string;
+  iconType?: number;
   parentCollectionId?: number | null;
   userId: number | null;
   isPublic: boolean;
+ 
 }
 
 // DTO ליצירת קובץ

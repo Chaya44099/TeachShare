@@ -1,7 +1,11 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import './styles/About.css';
 
 const About: React.FC = () => {
+  const isAuthenticated = useSelector((state: any) => state.auth.isAuthenticated);
+
   return (
     <div className="about-container">
       <div className="about-header">
@@ -54,13 +58,22 @@ const About: React.FC = () => {
         
         <div className="about-section">
           <h2>הצטרפי אלינו</h2>
-          <p>
-            TEACH SHARE היא קהילה שגדלה במהירות. הצטרפי לאלפי המורות שכבר משתמשות בפלטפורמה 
-            ותגלי את הכוח של שיתוף ידע חינוכי. יחד, נוכל לשנות את פני החינוך בישראל.
-          </p>
-          <div className="cta-container">
-            <a href="/auth" className="about-cta">הצטרפי עכשיו</a>
-          </div>
+          {isAuthenticated ? (
+            <>
+              <p>המשיכי לאזור האישי כדי לצפות בחומרים שלך או לחפש חומרים חדשים.</p>
+              <Link to="/dashboard" className="dashboard-link">לאזור האישי</Link>
+            </>
+          ) : (
+            <>
+              <p>
+                TEACH SHARE היא קהילה שגדלה במהירות. הצטרפי לאלפי המורות שכבר משתמשות בפלטפורמה 
+                ותגלי את הכוח של שיתוף ידע חינוכי. יחד, נוכל לשנות את פני החינוך בישראל.
+              </p>
+              <div className="cta-container">
+                <a href="/auth" className="about-cta">הצטרפי עכשיו</a>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ namespace TeachShare.Core.Entities
         [StringLength(100)]
         public string Name { get; set; }
 
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public DateTime CreatedDate { get; set; }
 
@@ -26,6 +26,7 @@ namespace TeachShare.Core.Entities
         public DateTime? DeletedDate { get; set; }
 
         public bool IsDeleted { get; set; }
+        public int iconType { get; set; }
 
 
         //[Key]

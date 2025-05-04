@@ -1,94 +1,105 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { createFolder } from '../../slices/CollectionSlice';
-import { CreateCollectionDto } from '../../Models/Collection';
-import { AppDispatch } from '../../store';
+// src/components/folders/NewFolderModal.tsx
+import React from "react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog"
+import { Button } from "../ui/button"
+import { FolderPlus, FolderSync } from "lucide-react"
+import { motion } from "framer-motion"
+import FolderForm from "./FolderForm"
+import StatusSnackbar from "./StatusSnackbar"
+import { useFolderCreation } from "../../hooks/useFolderCreation"
 
 interface NewFolderModalProps {
-    currentFolder: any;
-    onClose: () => void;
+  currentFolder: any
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-/**
- * NewFolderModal - Modal for creating a new folder.
- */
-const NewFolderModal: React.FC<NewFolderModalProps> = ({ currentFolder, onClose }) => {
-    const dispatch = useDispatch<AppDispatch>();
-    const [newFolderName, setNewFolderName] = useState('');
-    const [newFolderDescription, setNewFolderDescription] = useState('');
+const NewFolderModal: React.FC<NewFolderModalProps> = ({ currentFolder, open, onOpenChange }) => {
+  const {
+    newFolderName,
+    setNewFolderName,
+    newFolderDescription,
+    setNewFolderDescription,
+    selectedIcon,
+    setSelectedIcon,
+    isCreating,
+    handleCreateFolder,
+    resetForm,
+    snackbarOpen,
+    setSnackbarOpen,
+    snackbarMessage,
+    snackbarSeverity
+  } = useFolderCreation(currentFolder, onOpenChange)
 
-    // Create a new folder
-    const handleCreateFolder = () => {
-        if (newFolderName.trim()) {
-            const userString = sessionStorage.getItem('user');
-            let userId = null;
+  const handleClose = () => {
+    resetForm()
+    onOpenChange(false)
+  }
 
-            if (userString) {
-                const user = JSON.parse(userString);
-                userId = user.id;
-            }
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[500px] rtl" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-right flex items-center gap-2">
+              <FolderPlus className="h-6 w-6 text-emerald-500" />
+              יצירת תיקייה חדשה
+            </DialogTitle>
+            <DialogDescription className="text-right">צור תיקייה חדשה לארגון הקבצים והתוכן שלך</DialogDescription>
+          </DialogHeader>
 
-            const newFolder: CreateCollectionDto = {
-                name: newFolderName,
-                description: newFolderDescription || undefined,
-                parentCollectionId: currentFolder?.id || null,
-                userId: userId,
-                isPublic: false
-            };
+          <FolderForm 
+            newFolderName={newFolderName}
+            setNewFolderName={setNewFolderName}
+            newFolderDescription={newFolderDescription}
+            setNewFolderDescription={setNewFolderDescription}
+            selectedIcon={selectedIcon}
+            setSelectedIcon={setSelectedIcon}
+            currentFolder={currentFolder}
+          />
 
-            dispatch(createFolder(newFolder));
-            setNewFolderName('');
-            setNewFolderDescription('');
-            onClose();
-        }
-    };
+          <DialogFooter className="flex flex-row-reverse sm:justify-start gap-2">
+            <Button
+              type="submit"
+              onClick={handleCreateFolder}
+              disabled={!newFolderName.trim() || isCreating}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {isCreating ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1, ease: "linear" }}
+                    className="mr-2"
+                  >
+                    <FolderSync className="h-4 w-4" />
+                  </motion.div>
+                  יוצר תיקייה...
+                </>
+              ) : (
+                <>יצירת תיקייה</>
+              )}
+            </Button>
+            <Button variant="outline" onClick={handleClose}>ביטול</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-    return (
-        <div className="modal-overlay">
-            <div className="modal small-modal">
-                <div className="modal-header">
-                    <h3>יצירת תיקייה חדשה</h3>
-                    <button
-                        className="close-modal-btn"
-                        onClick={onClose}
-                    >
-                        ✕
-                    </button>
-                </div>
-                <div className="form-group">
-                    <label htmlFor="folderName">שם התיקייה</label>
-                    <input
-                        type="text"
-                        id="folderName"
-                        value={newFolderName}
-                        onChange={(e) => setNewFolderName(e.target.value)}
-                        placeholder="הזיני שם לתיקייה החדשה"
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="folderDescription">תיאור (אופציונלי)</label>
-                    <textarea
-                        id="folderDescription"
-                        value={newFolderDescription}
-                        onChange={(e) => setNewFolderDescription(e.target.value)}
-                        placeholder="תיאור התיקייה"
-                        rows={3}
-                    />
-                </div>
-                <div className="form-actions">
-                    <button type="button" onClick={onClose}>ביטול</button>
-                    <button
-                        className="submit-btn"
-                        onClick={handleCreateFolder}
-                        disabled={!newFolderName.trim()}
-                    >
-                        יצירת תיקייה
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
+      <StatusSnackbar 
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+      />
+    </>
+  )
+}
 
-export default NewFolderModal;
+export default NewFolderModal
