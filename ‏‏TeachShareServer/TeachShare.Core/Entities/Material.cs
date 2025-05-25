@@ -8,6 +8,34 @@ using System.Threading.Tasks;
 
 namespace TeachShare.Core.Entities
 {
+    public class Material
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        public string Name { get; set; }
+
+        public string Type { get; set; }
+        public long Size { get; set; }
+        //public string AwsUrl { get; set; }
+        public string S3Key { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public bool IsPublic { get; set; } = false;
+
+        public int UserId { get; set; }
+        public virtual User User { get; set; }
+
+        public int? CollectionID { get; set; }
+        public Collection Collection { get; set; }
+
+        public int? CategoryId { get; set; }
+        public virtual Category Category { get; set; }
+    
+
     //public class Material
     //{
     //    [Key]
@@ -44,91 +72,92 @@ namespace TeachShare.Core.Entities
     //    public DateTime UpdatedAt { get; set; } // תאריך עדכון הרשומה
     //}
 
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
+    //using System;
+    //using System.Collections.Generic;
+    //using System.ComponentModel.DataAnnotations;
 
-    public class Material
-    {
-        [Key]
-        public int Id { get; set; }
+    //public class Material
+    //{
+    //    [Key]
+    //    public int Id { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string Name { get; set; }
+    //    [Required]
+    //    [StringLength(255)]
+    //    public string Name { get; set; }
 
-        [StringLength(255)]
-        public string Type { get; set; }
+    //    [StringLength(255)]
+    //    public string Type { get; set; }
 
-        public long Size { get; set; }
+    //    public long Size { get; set; }
 
-        [StringLength(512)]
-        public string AwsUrl { get; set; }
+    //    [StringLength(512)]
+    //    public string AwsUrl { get; set; }
 
-        [StringLength(512)]
-        public string S3Key { get; set; }
+    //    [StringLength(512)]
+    //    public string S3Key { get; set; }
 
-        public DateTime CreatedDate { get; set; }
+    //    public DateTime CreatedDate { get; set; }
 
-        public DateTime? ModifiedDate { get; set; }
+    //    public DateTime? ModifiedDate { get; set; }
 
-        public DateTime? DeletedDate { get; set; }
+      public DateTime? DeletedDate { get; set; }
 
-        public bool IsDeleted { get; set; }
+    //    public bool IsDeleted { get; set; }
 
 
-        //public string Name { get; set; }
-        //public string Type { get; set; }
-        //public long Size { get; set; }
-        //public string AWSUrl { get; set; }
-        //public DateTime CreatedDate { get; set; }
-        //public int CollectionId { get; set; } // זיהוי התיקייה שהקובץ שייך אליה
-        //public int UserId { get; set; }
-        ////[Key]
-        //public int MaterialId { get; set; } // מספר מזהה ייחודי
+    //public string Name { get; set; }
+    //public string Type { get; set; }
+    //public long Size { get; set; }
+    //public string AWSUrl { get; set; }
+    //public DateTime CreatedDate { get; set; }
+    //public int CollectionId { get; set; } // זיהוי התיקייה שהקובץ שייך אליה
+    //public int UserId { get; set; }
+    ////[Key]
+    //public int MaterialId { get; set; } // מספר מזהה ייחודי
 
-        //[Required]
-        //public int UserId { get; set; } // מזהה המשתמש שהעלה את החומר
+    //[Required]
+    //public int UserId { get; set; } // מזהה המשתמש שהעלה את החומר
 
-        //[Required]
-        //[StringLength(255)]
-        //public string Title { get; set; } // כותרת החומר
+    //[Required]
+    //[StringLength(255)]
+    //public string Title { get; set; } // כותרת החומר
 
-        //public string Description { get; set; } // תיאור החומר
+    //public string Description { get; set; } // תיאור החומר
 
-        //[StringLength(255)]
-        //public string FilePath { get; set; } // נתיב לקובץ
+    //[StringLength(255)]
+    //public string FilePath { get; set; } // נתיב לקובץ
 
-        //public int FileSize { get; set; } // גודל הקובץ
+    //public int FileSize { get; set; } // גודל הקובץ
 
-        //[StringLength(50)]
-        //public string FileType { get; set; } // סוג הקובץ
+    //[StringLength(50)]
+    //public string FileType { get; set; } // סוג הקובץ
 
-        //public DateTime UploadDate { get; set; } = DateTime.UtcNow; // תאריך העלאה
+    //public DateTime UploadDate { get; set; } = DateTime.UtcNow; // תאריך העלאה
 
-        //public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow; // תאריך עדכון אחרון
+    //public DateTime LastUpdateDate { get; set; } = DateTime.UtcNow; // תאריך עדכון אחרון
 
-        //public bool IsPublic { get; set; } = false; // האם החומר גלוי לכולם
+    //public bool IsPublic { get; set; } = false; // האם החומר גלוי לכולם
 
-        //public int DownloadCount { get; set; } = 0; // מספר הורדות
+    //public int DownloadCount { get; set; } = 0; // מספר הורדות
 
-        //public int ViewCount { get; set; } = 0; // מספר צפיות
+    //public int ViewCount { get; set; } = 0; // מספר צפיות
 
-        //public float AverageRating { get; set; } = 0; // דירוג ממוצע
+    //public float AverageRating { get; set; } = 0; // דירוג ממוצע
 
-        //public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // תאריך יצירה
-        //public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // תאריך עדכון
+    //public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // תאריך יצירה
+    //public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // תאריך עדכון
 
-        //// קשרים
-        public int UserId { get; set; }
-        public virtual User User { get; set; } //המשתמש שהעלה את החומר
-        public int? CollectionID { get; set; }//
-        public Collection collection { get; set; }
-        public virtual ICollection<Rating> Ratings { get; set; } // דירוגים לחומר
-        public virtual ICollection<Tag> Tags { get; set; } // תגיות שקשורות לחומר
-        public virtual ICollection<Category> Categories { get; set; } // קטגוריות שקשורות לחומר
+    //// קשרים
+    //public int UserId { get; set; }
+    //public virtual User User { get; set; } //המשתמש שהעלה את החומר
+    //public int? CollectionID { get; set; }//
+    //public Collection collection { get; set; }
+    //public virtual ICollection<Rating> Ratings { get; set; } // דירוגים לחומר
+    //public virtual ICollection<Tag> Tags { get; set; } // תגיות שקשורות לחומר
+    //public virtual ICollection<Category> Categories { get; set; } // קטגוריות שקשורות לחומר
 
-        //public virtual ICollection<Collection> Collections { get; set; } = new List<Collection>();
-    }
-
+    //public virtual ICollection<Collection> Collections { get; set; } = new List<Collection>();
 }
+     }
+
+

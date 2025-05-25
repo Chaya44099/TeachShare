@@ -41,7 +41,7 @@ const AuthForm: React.FC = () => {
   };
 
   return (
-    <div className="auth-form-card">
+    <div  className="auth-form-card">
       <h2 className="auth-form-title">{isLoginMode ? 'התחברות' : 'הרשמה'}</h2>
       
       <div className="auth-form-toggle">

@@ -33,6 +33,7 @@ const Navbar: React.FC = () => {
           <Link to="/about" className="nav-link">אודות</Link>
           {isAuthenticated ? (
             <>
+              <Link to="/materials" className="nav-link">חומרים</Link>
               <Link to="/dashboard" className="nav-link">האזור האישי</Link>
               <div className="user-menu">
                 <span className="username">שלום, {user?.firstName || 'משתמש/ת'}</span>

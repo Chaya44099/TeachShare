@@ -22,36 +22,6 @@ namespace TeachShare.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CategoryMaterial", b =>
-                {
-                    b.Property<int>("CategoriesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MaterialsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CategoriesId", "MaterialsId");
-
-                    b.HasIndex("MaterialsId");
-
-                    b.ToTable("CategoryMaterial");
-                });
-
-            modelBuilder.Entity("MaterialTag", b =>
-                {
-                    b.Property<int>("MaterialsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("MaterialsId", "TagsId");
-
-                    b.HasIndex("TagsId");
-
-                    b.ToTable("MaterialTag");
-                });
-
             modelBuilder.Entity("TeachShare.Core.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -63,35 +33,15 @@ namespace TeachShare.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<string>("IconPath")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("ParentCategoryId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
                 });
@@ -150,10 +100,8 @@ namespace TeachShare.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AwsUrl")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("CollectionID")
                         .HasColumnType("int");
@@ -167,6 +115,9 @@ namespace TeachShare.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
@@ -177,23 +128,28 @@ namespace TeachShare.Data.Migrations
 
                     b.Property<string>("S3Key")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("Size")
                         .HasColumnType("bigint");
 
+                    b.Property<int?>("TagId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("CollectionID");
+
+                    b.HasIndex("TagId");
 
                     b.HasIndex("UserId");
 
@@ -358,51 +314,11 @@ namespace TeachShare.Data.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CategoryMaterial", b =>
-                {
-                    b.HasOne("TeachShare.Core.Entities.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TeachShare.Core.Entities.Material", null)
-                        .WithMany()
-                        .HasForeignKey("MaterialsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("MaterialTag", b =>
-                {
-                    b.HasOne("TeachShare.Core.Entities.Material", null)
-                        .WithMany()
-                        .HasForeignKey("MaterialsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TeachShare.Core.Entities.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("TeachShare.Core.Entities.Category", b =>
-                {
-                    b.HasOne("TeachShare.Core.Entities.Category", "ParentCategory")
-                        .WithMany("SubCategories")
-                        .HasForeignKey("ParentCategoryId");
-
-                    b.Navigation("ParentCategory");
-                });
-
             modelBuilder.Entity("TeachShare.Core.Entities.Collection", b =>
                 {
                     b.HasOne("TeachShare.Core.Entities.Collection", "ParentCollection")
                         .WithMany("SubCollections")
-                        .HasForeignKey("ParentCollectionId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .HasForeignKey("ParentCollectionId");
 
                     b.HasOne("TeachShare.Core.Entities.User", "User")
                         .WithMany("Collections")
@@ -417,9 +333,17 @@ namespace TeachShare.Data.Migrations
 
             modelBuilder.Entity("TeachShare.Core.Entities.Material", b =>
                 {
-                    b.HasOne("TeachShare.Core.Entities.Collection", "collection")
+                    b.HasOne("TeachShare.Core.Entities.Category", "Category")
+                        .WithMany("Materials")
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("TeachShare.Core.Entities.Collection", "Collection")
                         .WithMany("Materials")
                         .HasForeignKey("CollectionID");
+
+                    b.HasOne("TeachShare.Core.Entities.Tag", null)
+                        .WithMany("Materials")
+                        .HasForeignKey("TagId");
 
                     b.HasOne("TeachShare.Core.Entities.User", "User")
                         .WithMany("Materials")
@@ -427,15 +351,17 @@ namespace TeachShare.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Category");
 
-                    b.Navigation("collection");
+                    b.Navigation("Collection");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Rating", b =>
                 {
                     b.HasOne("TeachShare.Core.Entities.Material", "Material")
-                        .WithMany("Ratings")
+                        .WithMany()
                         .HasForeignKey("MaterialId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -453,7 +379,7 @@ namespace TeachShare.Data.Migrations
 
             modelBuilder.Entity("TeachShare.Core.Entities.Category", b =>
                 {
-                    b.Navigation("SubCategories");
+                    b.Navigation("Materials");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Collection", b =>
@@ -463,9 +389,9 @@ namespace TeachShare.Data.Migrations
                     b.Navigation("SubCollections");
                 });
 
-            modelBuilder.Entity("TeachShare.Core.Entities.Material", b =>
+            modelBuilder.Entity("TeachShare.Core.Entities.Tag", b =>
                 {
-                    b.Navigation("Ratings");
+                    b.Navigation("Materials");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.User", b =>

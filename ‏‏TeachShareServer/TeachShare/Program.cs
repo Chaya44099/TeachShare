@@ -17,6 +17,8 @@ using Amazon.S3;
 using Amazon.Runtime;
 using Amazon;
 using Amazon.Extensions.NETCore.Setup;
+using TeachShare.Data.Seed;
+using TeachShare.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 //var credentials = new BasicAWSCredentials(
@@ -67,9 +69,10 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
+builder.Services.AddScoped<DataSeeder>();
 
 // AutoMapper Configuration
-builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(UserPostModel));
+builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MappingProfilePostModel));
 
 // CORS Configuration
 builder.Services.AddCors(options =>
@@ -154,6 +157,12 @@ builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var seeder = services.GetRequiredService<DataSeeder>();
+    await seeder.SeedCategoriesAsync();
+}
 // Swagger and Development Configuration
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {

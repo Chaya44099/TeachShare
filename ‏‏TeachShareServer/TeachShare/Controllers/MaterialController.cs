@@ -38,6 +38,12 @@ namespace TeachShare.Api.Controllers
             }
             return Ok(material);
         }
+        [HttpGet("by-category/{id}")]
+        public async Task<IActionResult> GetMaterialsByCategory(int id)
+        {
+            var materials = await _materialService.GetMaterialsByCategoryAsync(id);
+            return Ok(materials);
+        }
 
         [HttpGet("folder/{folderId}")]
         public async Task<ActionResult<IEnumerable<MaterialDTO>>> GetMaterialsByFolder(int folderId)
@@ -47,9 +53,7 @@ namespace TeachShare.Api.Controllers
         }
 
         [HttpGet("presigned-url")]
-        public ActionResult GetPresignedUrl(
-            [FromQuery] string fileName,
-            [FromQuery] string contentType)
+        public ActionResult GetPresignedUrl( [FromQuery] string fileName, [FromQuery] string contentType)
         {
             try
             {
@@ -189,5 +193,37 @@ namespace TeachShare.Api.Controllers
             var files = await _materialService.GetFilesByOwnerAsync(userId);
             return Ok(files);
         }
+        [HttpPut("share/{id}")]
+        public async Task<IActionResult> ShareFile(int id, [FromBody] ShareMaterialDTO dto)
+        {
+            try
+            {
+                var updatedMaterial = await _materialService.ShareMaterialAsync(id, dto);
+                return Ok(updatedMaterial);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+        [HttpPut("rename/{id}")]
+        public async Task<IActionResult> RenameMaterial(int id, [FromBody] string newName)
+        {
+            var updatedMaterial = await _materialService.RenameMaterialAsync(id, newName);
+            if (updatedMaterial == null)
+                return NotFound(new { message = "Material not found" });
+
+            return Ok(updatedMaterial);
+        }
+
+
+        [HttpPut("delete/{id}")]
+        public async Task<IActionResult> SoftDelete(int id)
+        {
+            var deleted = await _materialService.SoftDeleteFileAsync(id);
+            if (deleted == null) return NotFound();
+            return Ok(deleted); 
+        }
+
     }
 }

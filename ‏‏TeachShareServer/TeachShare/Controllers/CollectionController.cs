@@ -159,5 +159,27 @@ namespace TeachShare.Api.Controllers
             var subCollections = await _collectionService.GetSubCollectionsAsync(parentId);
             return Ok(subCollections);
         }
+        [HttpPut("{id}")]
+        public async Task<ActionResult<CollectionDTO>> UpdateCollection(int id, [FromBody] CollectionPutModel updateDto)
+       {
+            if (id != updateDto.Id)
+                return BadRequest("ID mismatch");
+
+            var collectionDto = _mapper.Map<CollectionDTO>(updateDto);
+            var updatedCollection = await _collectionService.UpdateCollectionAsync(collectionDto);
+            if (updatedCollection == null)
+                return NotFound();
+
+            return Ok(updatedCollection);
+        }
+        [HttpPut("delete/{id}")]
+        public async Task<IActionResult> SoftDelete(int id)
+        {
+            var deleted = await _collectionService.SoftDeleteCollectionAsync(id);
+            if (deleted == null) return NotFound();
+            return Ok(deleted); // במקום NoContent
+        }
+
+
     }
 }

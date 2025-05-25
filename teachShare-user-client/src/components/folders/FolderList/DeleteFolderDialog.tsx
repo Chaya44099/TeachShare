@@ -1,6 +1,9 @@
+"use client"
+
 import React from "react"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Loader2 } from "lucide-react"
 import type { Collection } from "../../../Models/Collection"
+import { useFolderDeletion } from "../../../hooks/useFolderDeletion"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,15 +22,14 @@ interface DeleteFolderDialogProps {
 }
 
 export const DeleteFolderDialog: React.FC<DeleteFolderDialogProps> = ({ isOpen, setIsOpen, folder }) => {
+  const { isDeleting, error, handleDeleteFolder } = useFolderDeletion()
+
   // מחיקת תיקייה
   const confirmDeleteFolder = async () => {
     if (folder) {
-      try {
-        // כאן צריך להפעיל את פעולת המחיקה בפועל
-        // await dispatch(deleteFolder(folder.id))
+      const success = await handleDeleteFolder(folder)
+      if (success) {
         setIsOpen(false)
-      } catch (error) {
-        console.error("שגיאה במחיקת תיקייה:", error)
       }
     }
   }
@@ -46,9 +48,28 @@ export const DeleteFolderDialog: React.FC<DeleteFolderDialogProps> = ({ isOpen, 
             פעולה זו תמחק גם את כל התיקיות והקבצים שבתוכה.
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        {error && (
+          <div className="bg-red-50 text-red-700 p-3 rounded-md flex items-center gap-2 text-sm">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <AlertDialogFooter className="flex-row-reverse">
-          <AlertDialogAction onClick={confirmDeleteFolder} className="bg-red-600 hover:bg-red-700">
-            מחיקה
+          <AlertDialogAction
+            onClick={confirmDeleteFolder}
+            className="bg-red-600 hover:bg-red-700 flex items-center gap-2"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                מוחק...
+              </>
+            ) : (
+              "מחיקה"
+            )}
           </AlertDialogAction>
           <AlertDialogCancel>ביטול</AlertDialogCancel>
         </AlertDialogFooter>

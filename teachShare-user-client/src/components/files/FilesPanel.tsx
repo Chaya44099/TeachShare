@@ -11,9 +11,10 @@ import FileList from "./FileList"
 import UploadFileModal from "./UploadFile/UploadFileModal"
 import ViewFileModal from "./ViewFileModal/ViewFileModal"
 import "../styles/FilesPanel.css"
-import { FileUp, FolderOpen, Loader2, AlertCircle, Search } from "lucide-react"
+import { FileUp, FolderOpen, Loader2, AlertCircle, Search, Trash2 } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 
 /**
  * FilesPanel - Main container for file management functionality.
@@ -28,6 +29,7 @@ const FilesPanel: React.FC = () => {
   const [viewFile, setViewFile] = useState<Material | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState("active")
 
   // Load files when current folder changes
   useEffect(() => {
@@ -49,8 +51,12 @@ const FilesPanel: React.FC = () => {
     }
   }
 
-  // סינון קבצים לפי חיפוש
-  const filteredFiles = currentFiles.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  // סינון קבצים לפי חיפוש וסטטוס מחיקה
+  const filteredFiles = currentFiles.filter((file) => {
+    const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesTab = activeTab === "active" ? !file.isDeleted : file.isDeleted
+    return matchesSearch && matchesTab
+  })
 
   return (
     <div className="files-panel p-4 rounded-lg bg-white shadow-sm flex flex-col h-full">
@@ -65,20 +71,6 @@ const FilesPanel: React.FC = () => {
         </Button>
       </div>
 
-      {/* חיפוש קבצים - עם רוחב מוגבל */}
-      {currentFolder && currentFiles.length > 0 && (
-        <div className="relative mb-4 w-64 mr-auto">
-          <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <Input
-            placeholder="חיפוש קבצים..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-9 text-right"
-            dir="rtl"
-          />
-        </div>
-      )}
-
       {!currentFolder && (
         <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4 flex items-center gap-2 text-amber-700 flex-shrink-0">
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -86,53 +78,105 @@ const FilesPanel: React.FC = () => {
         </div>
       )}
 
-      <div className="flex-grow overflow-hidden">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500 h-full">
-            <Loader2 className="h-8 w-8 animate-spin mb-2" />
-            <p>טוען קבצים...</p>
-          </div>
-        ) : currentFolder && filteredFiles.length > 0 ? (
-          <FileList files={filteredFiles} onViewFile={handleViewFile} />
-        ) : currentFolder && searchQuery && currentFiles.length > 0 ? (
-          <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
-            <Search className="h-8 w-8 text-gray-400 mb-2" />
-            <p className="text-lg font-medium text-gray-700 mb-1">לא נמצאו קבצים</p>
-            <p className="text-gray-500">לא נמצאו קבצים התואמים לחיפוש "{searchQuery}"</p>
-          </div>
-        ) : currentFolder ? (
-          <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <FileUp className="h-8 w-8 text-gray-400" />
-            </div>
-            <p className="text-lg font-medium text-gray-700 mb-1">אין קבצים בתיקייה זו</p>
-            <p className="text-gray-500 mb-4">העלי קובץ ראשון כדי להתחיל</p>
-            <Button
-              onClick={() => setIsUploadModalOpen(true)}
-              variant="outline"
-              className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-            >
-              <FileUp className="mr-2 h-4 w-4" />
-              העלאת קובץ ראשון
-            </Button>
-          </div>
-        ) : (
-          <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <FolderOpen className="h-8 w-8 text-gray-400" />
-            </div>
-            <p className="text-lg font-medium text-gray-700">בחרי תיקייה מהרשימה</p>
-            <p className="text-gray-500">כדי לצפות בקבצים ולנהל אותם</p>
-          </div>
-        )}
-      </div>
+      {currentFolder && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-4">
+          <div className="flex justify-between items-center">
+            <TabsList>
+              <TabsTrigger value="active" className="flex items-center gap-1">
+                <FolderOpen className="h-4 w-4" />
+                קבצים פעילים
+              </TabsTrigger>
+              <TabsTrigger value="deleted" className="flex items-center gap-1">
+                <Trash2 className="h-4 w-4" />
+                סל מחזור
+              </TabsTrigger>
+            </TabsList>
 
-      {/* מודל העלאת קובץ - עם הממשק החדש */}
+            {/* חיפוש קבצים - עם רוחב מוגבל */}
+            {currentFolder && filteredFiles.length > 0 && (
+              <div className="relative w-64">
+                <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="חיפוש קבצים..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-9 text-right"
+                  dir="rtl"
+                />
+              </div>
+            )}
+          </div>
+
+          <TabsContent value="active" className="mt-4">
+            <div className="flex-grow overflow-hidden">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-500 h-full">
+                  <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                  <p>טוען קבצים...</p>
+                </div>
+              ) : filteredFiles.length > 0 ? (
+                <FileList files={filteredFiles} onViewFile={handleViewFile} />
+              ) : searchQuery ? (
+                <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                  <Search className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-lg font-medium text-gray-700 mb-1">לא נמצאו קבצים</p>
+                  <p className="text-gray-500">לא נמצאו קבצים פעילים התואמים לחיפוש "{searchQuery}"</p>
+                </div>
+              ) : (
+                <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                    <FileUp className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-lg font-medium text-gray-700 mb-1">אין קבצים פעילים בתיקייה זו</p>
+                  <p className="text-gray-500 mb-4">העלי קובץ ראשון כדי להתחיל</p>
+                  <Button
+                    onClick={() => setIsUploadModalOpen(true)}
+                    variant="outline"
+                    className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                  >
+                    <FileUp className="mr-2 h-4 w-4" />
+                    העלאת קובץ ראשון
+                  </Button>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="deleted" className="mt-4">
+            <div className="flex-grow overflow-hidden">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-500 h-full">
+                  <Loader2 className="h-8 w-8 animate-spin mb-2" />
+                  <p>טוען קבצים...</p>
+                </div>
+              ) : filteredFiles.length > 0 ? (
+                <FileList files={filteredFiles} onViewFile={handleViewFile} />
+              ) : searchQuery ? (
+                <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                  <Search className="h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-lg font-medium text-gray-700 mb-1">לא נמצאו קבצים</p>
+                  <p className="text-gray-500">לא נמצאו קבצים מחוקים התואמים לחיפוש "{searchQuery}"</p>
+                </div>
+              ) : (
+                <div className="empty-state bg-gray-50 rounded-lg p-8 text-center h-full flex flex-col items-center justify-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                    <Trash2 className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <p className="text-lg font-medium text-gray-700 mb-1">סל המחזור ריק</p>
+                  <p className="text-gray-500">אין קבצים שנמחקו בתיקייה זו</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      )}
+
+      {/* מודל העלאת קובץ */}
       {currentFolder && (
         <UploadFileModal currentFolder={currentFolder} open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen} />
       )}
 
-      {/* מודל צפייה בקובץ - עם הממשק החדש */}
+      {/* מודל צפייה בקובץ */}
       {viewFile && <ViewFileModal file={viewFile} open={isViewModalOpen} onOpenChange={setIsViewModalOpen} />}
     </div>
   )

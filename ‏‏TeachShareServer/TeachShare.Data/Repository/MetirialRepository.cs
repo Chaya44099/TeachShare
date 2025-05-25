@@ -2,10 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using TeachShare.Core.DTOs;
 using TeachShare.Core.Entities;
 using TeachShare.Core.Irepositories;
+
+
 
 namespace TeachShare.Data.Repository
 {
@@ -18,109 +22,76 @@ namespace TeachShare.Data.Repository
             _context = context;
         }
 
-        //        public async Task<IEnumerable<Material>> GetAllAsync()
-        //        {
-        //            return await _context.Materials.Include(x=>x.User).ToListAsync();
-        //        }
-
-        //        public async Task<Material> GetByIdAsync(int id)
-        //        {
-        //            return await _context.Materials
-        //                .Include(f => f.collection)
-        //                .Include(f => f.User)
-        //                .FirstOrDefaultAsync(f => f.Id == id);
-        //        }
         public async Task<Material> AddAsync(Material material)
         {
-           // material.CreatedAt = DateTime.UtcNow;
             _context.Materials.Add(material);
-            //await _context.SaveChangesAsync();
             return material;
         }
 
-        //        public async Task<Material> UpdateAsync(int id, Material entity)
-        //        {
-        //            var existingEntity = await GetByIdAsync(id);
-        //            if (existingEntity == null) throw new Exception("Material not found");
-
-        //            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
-        //            return existingEntity;
-        //        }
-
-        //        public async Task<bool> DeleteAsync(int id)
-        //        {
-        //            var material = await _context.Materials.FindAsync(id);
-        //            if (material == null) return false;
-
-        //            material.IsDeleted = true;
-        //            //await _context.SaveChangesAsync();
-        //            return true;
-        //        }
-        //        public async Task<IEnumerable<Material>> GetFilesByOwnerAsync(int ownerId)
-        //        {
-        //            return await _context.Materials
-        //                .Where(f => f.UserId == ownerId && !f.IsDeleted)
-        //                .ToListAsync();
-        //        }
-
-        //        public async Task<IEnumerable<Material>> GetFilesByFolderAsync(int folderId)
-        //        {
-        //            return await _context.Materials
-        //                .Where(f => f.CollectionID == folderId && !f.IsDeleted)
-        //                .ToListAsync();
-        //        }
-
-
-
-
-
-
-        //    }
-        //}
-        public  async Task<IEnumerable<Material>> GetAllAsync()
+        public async Task<IEnumerable<Material>> GetAllAsync()
         {
             return await _context.Materials
-                .Where(m => !m.IsDeleted)
-                .ToListAsync();
+                .ToListAsync(); // ❌ אין צורך בסינון IsDeleted – מטופל ע"י Query Filter
         }
 
-        public  async Task<Material>GetByIdAsync(int id)
+        public async Task<Material> GetByIdAsync(int id)
         {
             return await _context.Materials
-                .FirstOrDefaultAsync(m => m.Id == id && !m.IsDeleted);
+                .FirstOrDefaultAsync(m => m.Id == id); // ❌ אין צורך בסינון IsDeleted
         }
 
         public async Task<IEnumerable<Material>> GetMaterialsByFolderAsync(int folderId)
         {
             return await _context.Materials
-                .Where(m => m.CollectionID == folderId && !m.IsDeleted)
-                .ToListAsync();
+                .Where(m => m.CollectionID == folderId)
+                .ToListAsync(); // ❌ אין צורך בסינון IsDeleted
         }
 
         public async Task<IEnumerable<Material>> GetFilesByOwnerAsync(int userId)
         {
             return await _context.Materials
-                .Where(m => m.UserId == userId && !m.IsDeleted)
-                .ToListAsync();
+                .Where(m => m.UserId == userId)
+                .ToListAsync(); // ❌ אין צורך בסינון IsDeleted
         }
 
-        public  async Task<bool> DeleteAsync(int id)
+        public async Task<bool> SoftDeleteAsync(Material material)
         {
-            var material = await GetByIdAsync(id);
-            if (material == null) return false;
+            if(material == null)
+                return false;
+            material.IsDeleted = true;  // נניח ש-FileEntity מכיל שדה IsDeleted מסוג bool
+            material.DeletedDate = DateTime.UtcNow; // אופציונלי - לשמור תאריך מחיקה
 
-            // Soft delete
-            material.IsDeleted = true;
-            material.DeletedDate = System.DateTime.UtcNow;
             _context.Materials.Update(material);
-
             return true;
         }
 
-        //public Task<Material> AddAsync(Material entity)
+        //public async Task UpdateAsync(Material material)
         //{
-        //    throw new NotImplementedException();
+        //    _context.Materials.Update(material);
+        //    await _context.SaveChangesAsync();
         //}
+
+        //public async Task<Material> UpdateAsync(int id, Material entity)
+        //{
+        //    var existing = await GetByIdAsync(id);
+        //    if (existing == null) throw new Exception("Material not found");
+
+        //    _context.Entry(existing).CurrentValues.SetValues(entity);
+        //    _context.Materials.Update(existing);
+        //    return existing;
+        //}
+
+        public async Task<IEnumerable<Material>> FindAllAsync(Expression<Func<Material, bool>> predicate)
+        {
+            return await _context.Materials
+                .Where(predicate)
+                .ToListAsync(); // גם פה Query Filter יופעל אוטומטית
+        }
+
+        public Task<bool> DeleteAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
 
         public Task<Material> UpdateAsync(int id, Material entity)
         {

@@ -11,5 +11,9 @@ namespace TeachShare.Core.Irepositories
     {
         Task<IEnumerable<Collection>> GetRootCollectionsAsync(int userId);
         Task<IEnumerable<Collection>> GetSubCollectionsAsync(int parentId);
+        Task<bool> SoftDeleteRecursiveAsync(Collection folder);
+
+
+
     }
 }

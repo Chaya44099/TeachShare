@@ -1,13 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
+import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import {
-  fetchSubFolders,
-  navigateToFolder,
-  navigateBack,
-  selectFolderCache,
-} from "../../../slices/CollectionSlice"
+import { fetchSubFolders, navigateToFolder, navigateBack, selectFolderCache } from "../../../slices/CollectionSlice"
 import { setCurrentFiles } from "../../../slices/MaterialSlice"
 import type { Collection } from "../../../Models/Collection"
 import type { AppDispatch } from "../../../store"
@@ -17,6 +13,7 @@ import { FolderSearch } from "./FolderSearch"
 import { FolderList } from "./FolderList"
 import { EmptyFolderState } from "./EmptyFolderState"
 import { DeleteFolderDialog } from "./DeleteFolderDialog"
+import EditFolderDialog from "../../folders/EditFolderDialog"
 
 import { ScrollArea } from "../../../components/ui/scroll-area"
 // import { motion } from "framer-motion"
@@ -35,6 +32,8 @@ const FoldersList: React.FC<FoldersListProps> = ({ folders, currentFolder }) => 
   const [searchQuery, setSearchQuery] = useState("")
   const [folderToDelete, setFolderToDelete] = useState<Collection | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [folderToEdit, setFolderToEdit] = useState<Collection | null>(null)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   // טיפול בלחיצה על תיקייה - ניווט לתיקייה וטעינת התוכן שלה
   const handleFolderClick = (folder: Collection) => {
@@ -63,41 +62,42 @@ const FoldersList: React.FC<FoldersListProps> = ({ folders, currentFolder }) => 
     setIsDeleteDialogOpen(true)
   }
 
+  // פתיחת דיאלוג עריכת תיקייה
+  const openEditDialog = (folder: Collection) => {
+    setFolderToEdit(folder)
+    setIsEditDialogOpen(true)
+  }
+
   // סינון תיקיות לפי חיפוש
   const filteredFolders = folders.filter((folder) => folder.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   return (
     <div className="space-y-4">
       {/* כפתור חזרה */}
-      {currentFolder && (
-        <BackButton onClick={handleBackClick} />
-      )}
+      {currentFolder && <BackButton onClick={handleBackClick} />}
 
       {/* חיפוש תיקיות */}
-      <FolderSearch 
-        searchQuery={searchQuery} 
-        setSearchQuery={setSearchQuery} 
-      />
+      <FolderSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* רשימת תיקיות */}
       <ScrollArea className="h-[calc(100vh-320px)]">
         {filteredFolders.length === 0 ? (
           <EmptyFolderState searchQuery={searchQuery} currentFolder={currentFolder} />
         ) : (
-          <FolderList 
-            folders={filteredFolders} 
-            onFolderClick={handleFolderClick} 
-            onDeleteClick={openDeleteDialog} 
+          <FolderList
+            folders={filteredFolders}
+            onFolderClick={handleFolderClick}
+            onDeleteClick={openDeleteDialog}
+            onEditClick={openEditDialog}
           />
         )}
       </ScrollArea>
 
       {/* דיאלוג אישור מחיקת תיקייה */}
-      <DeleteFolderDialog 
-        isOpen={isDeleteDialogOpen} 
-        setIsOpen={setIsDeleteDialogOpen} 
-        folder={folderToDelete} 
-      />
+      <DeleteFolderDialog isOpen={isDeleteDialogOpen} setIsOpen={setIsDeleteDialogOpen} folder={folderToDelete} />
+
+      {/* דיאלוג עריכת תיקייה */}
+      <EditFolderDialog isOpen={isEditDialogOpen} setIsOpen={setIsEditDialogOpen} folder={folderToEdit} />
     </div>
   )
 }

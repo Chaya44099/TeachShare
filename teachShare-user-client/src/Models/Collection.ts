@@ -7,25 +7,28 @@ export interface Collection {
   lastUpdatedDate?: string;
   parentCollectionId?: number | null;
   userId: number;
-  isPublic: boolean;
   subCollections?: Collection[];
   materials?: Material[];
   iconType?: number;  
 }
 
 // מודל לקובץ
+// עדכון ממשק Material להוספת שדה isDeleted
 export interface Material {
-  id: number;
-  name: string;
-  type: string;
-  size: number;
-  createdDate: string;
-  lastUpdatedDate?: string;
-  collectionID: number;
-  userId: number;
-  awsUrl: string;
-  s3Key: string;
+  id: number
+  name: string
+  type: string
+  size: number
+  createdDate: string
+  lastUpdatedDate?: string
+  collectionID: number
+  userId: number
+  s3Key: string
+  isPublic: boolean
+  categoryId?: number
+  isDeleted?: boolean // שדה חדש לציון האם הקובץ נמחק (מחיקה רכה)
 }
+
 
 // DTO ליצירת תיקייה
 export interface CreateCollectionDto {
@@ -40,14 +43,13 @@ export interface CreateCollectionDto {
 
 // DTO ליצירת קובץ
 export interface MaterialDTO {
-  id?: number;
   name: string;
   type: string;
   size: number;
-  createdDate?: string;
-  lastUpdatedDate?: string;
   collectionID: number;
   userId: number;
-  awsUrl: string;
   s3Key: string;
+  createdDate: string;
+  isPublic?: boolean;
+  categoryId?: number;
 }

@@ -2,12 +2,14 @@
 .auth-form-card {
     width: 100%;
     max-width: 450px;
-    margin: 0 auto;
+    
+    margin: 2rem auto 0;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
     padding: 2rem;
     direction: rtl;
+    
   }
   
   .auth-form-title {

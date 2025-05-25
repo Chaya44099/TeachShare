@@ -1,6 +1,8 @@
-import React from "react"
+"use client"
+
+import  React from "react"
 import { motion } from "framer-motion"
-import { ChevronLeft, Trash2 } from "lucide-react"
+import { ChevronLeft, Trash2, Edit } from "lucide-react"
 import { Card, CardContent } from "../../../components/ui/card"
 import { Button } from "../../../components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../components/ui/tooltip"
@@ -13,9 +15,10 @@ interface FolderItemProps {
   index: number
   onClick: () => void
   onDeleteClick: (e: React.MouseEvent) => void
+  onEditClick: (e: React.MouseEvent) => void
 }
 
-export const FolderItem: React.FC<FolderItemProps> = ({ folder, index, onClick, onDeleteClick }) => {
+export const FolderItem: React.FC<FolderItemProps> = ({ folder, index, onClick, onDeleteClick, onEditClick }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -33,9 +36,26 @@ export const FolderItem: React.FC<FolderItemProps> = ({ folder, index, onClick, 
         onClick={onClick}
       >
         <CardContent className="p-3 flex items-center justify-between">
-          {/* צד ימין: חץ ופח */}
+          {/* צד ימין: חץ, עריכה ופח */}
           <div className="flex items-center gap-2">
             <ChevronLeft className="h-5 w-5 text-gray-400" />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={onEditClick}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>עריכת תיקייה</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

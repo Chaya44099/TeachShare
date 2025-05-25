@@ -11,10 +11,13 @@ namespace TeachShare.Api
         {
             CreateMap<UserDTO, UserPostModel>().ReverseMap();
             CreateMap<CollectionDTO, CollectionPostModel>().ReverseMap();
+            CreateMap<CollectionDTO, CollectionPutModel>().ReverseMap();
+
             //CreateMap<Category, CategoryDTO>().ReverseMap();
             //CreateMap<Material, MaterialDTO>().ReverseMap();
             //CreateMap<Rating, RatingDTO>().ReverseMap();
             //CreateMap<Tag, TagDTO>().ReverseMap();
         }
+
     }
 }

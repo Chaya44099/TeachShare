@@ -147,63 +147,156 @@
 //        return false;
 //    }
 //}
+//using AutoMapper;
+//using System;
+//using System.Collections.Generic;
+//using System.Threading.Tasks;
+//using TeachShare.Core.DTOs;
+//using TeachShare.Core.Entities;
+//using TeachShare.Core.Irepositories;
+//using TeachShare.Core.Iservices;
+
+//namespace TeachShare.Service.Services
+//{
+//    public class CollectionService : ICollectionService
+//    {
+//        private readonly IRepositoryManager _repositoryManager;
+//        private readonly IMapper _mapper;
+
+//        public CollectionService(IRepositoryManager repository, IMapper mapper)
+//        {
+//            _repositoryManager = repository;
+//            _mapper = mapper;
+//        }
+
+//        public async Task<IEnumerable<CollectionDTO>> GetAllCollectionsAsync()
+//        {
+//            var collections = await _repositoryManager.CollectionRepository.GetAllAsync();
+//            return _mapper.Map<IEnumerable<CollectionDTO>>(collections);
+//        }
+
+//        public async Task<CollectionDTO> GetCollectionByIdAsync(int collectionId)
+//        {
+//            var collection = await _repositoryManager.CollectionRepository.GetByIdAsync(collectionId);
+//            return _mapper.Map<CollectionDTO>(collection);
+//        }
+
+//        public async Task<CollectionDTO> CreateCollectionAsync(CollectionDTO collectionDto)
+//        {
+//            var collectionEntity = _mapper.Map<Collection>(collectionDto);
+//            collectionEntity.CreatedDate = DateTime.UtcNow;
+//            collectionEntity.IsDeleted = false;
+
+//            var collectionEntityAdded = await _repositoryManager.CollectionRepository.AddAsync(collectionEntity);
+//            await _repositoryManager.SaveAsync();
+//            return _mapper.Map<CollectionDTO>(collectionEntityAdded);
+//        }
+
+//        public async Task<IEnumerable<CollectionDTO>> GetRootCollectionsAsync(int userId)
+//        {
+//            var rootCollections = await _repositoryManager.CollectionRepository.GetRootCollectionsAsync(userId);
+//            return _mapper.Map<IEnumerable<CollectionDTO>>(rootCollections);
+//        }
+
+//        public async Task<IEnumerable<CollectionDTO>> GetSubCollectionsAsync(int parentId)
+//        {
+//            var subCollections = await _repositoryManager.CollectionRepository.GetSubCollectionsAsync(parentId);
+//            return _mapper.Map<IEnumerable<CollectionDTO>>(subCollections);
+//        }
+//        public async Task<CollectionDTO?> UpdateCollectionAsync(CollectionDTO updateDto)
+//        {
+//            var collection = await _repositoryManager.CollectionRepository.GetByIdAsync(updateDto.Id);
+//            if (collection == null)
+//                return null;
+
+//            collection.Name = updateDto.Name;
+//            collection.Description = updateDto.Description;
+//            collection.iconType = updateDto.IconType;
+//            collection.ModifiedDate = DateTime.UtcNow;
+
+//            await _repositoryManager.SaveAsync();
+
+//            return _mapper.Map<CollectionDTO>(collection);
+//        }
+
+
+//    }
+//}
 using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TeachShare.Core.DTOs;
 using TeachShare.Core.Entities;
 using TeachShare.Core.Irepositories;
 using TeachShare.Core.Iservices;
 
-namespace TeachShare.Service.Services
+public class CollectionService : ICollectionService
 {
-    public class CollectionService : ICollectionService
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly IMapper _mapper;
+
+    public CollectionService(IRepositoryManager repository, IMapper mapper)
     {
-        private readonly IRepositoryManager _repositoryManager;
-        private readonly IMapper _mapper;
+        _repositoryManager = repository;
+        _mapper = mapper;
+    }
 
-        public CollectionService(IRepositoryManager repository, IMapper mapper)
-        {
-            _repositoryManager = repository;
-            _mapper = mapper;
-        }
+    public async Task<IEnumerable<CollectionDTO>> GetAllCollectionsAsync()
+    {
+        var collections = await _repositoryManager.CollectionRepository.GetAllAsync();
+        return _mapper.Map<IEnumerable<CollectionDTO>>(collections);
+    }
 
-        public async Task<IEnumerable<CollectionDTO>> GetAllCollectionsAsync()
-        {
-            var collections = await _repositoryManager.CollectionRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<CollectionDTO>>(collections);
-        }
+    public async Task<CollectionDTO> GetCollectionByIdAsync(int id)
+    {
+        var collection = await _repositoryManager.CollectionRepository.GetByIdAsync(id);
+        return _mapper.Map<CollectionDTO>(collection);
+    }
 
-        public async Task<CollectionDTO> GetCollectionByIdAsync(int collectionId)
-        {
-            var collection = await _repositoryManager.CollectionRepository.GetByIdAsync(collectionId);
-            return _mapper.Map<CollectionDTO>(collection);
-        }
+    public async Task<CollectionDTO> CreateCollectionAsync(CollectionDTO dto)
+    {
+        var entity = _mapper.Map<Collection>(dto);
+        entity.CreatedDate = DateTime.UtcNow;
+        entity.IsDeleted = false;
 
-        public async Task<CollectionDTO> CreateCollectionAsync(CollectionDTO collectionDto)
-        {
-            var collectionEntity = _mapper.Map<Collection>(collectionDto);
-            collectionEntity.CreatedDate = DateTime.UtcNow;
-            collectionEntity.IsDeleted = false;
+        var added = await _repositoryManager.CollectionRepository.AddAsync(entity);
+        await _repositoryManager.SaveAsync();
+        return _mapper.Map<CollectionDTO>(added);
+    }
 
-            var collectionEntityAdded = await _repositoryManager.CollectionRepository.AddAsync(collectionEntity);
-            await _repositoryManager.SaveAsync();
-            return _mapper.Map<CollectionDTO>(collectionEntityAdded);
-        }
+    public async Task<IEnumerable<CollectionDTO>> GetRootCollectionsAsync(int userId)
+    {
+        var rootCollections = await _repositoryManager.CollectionRepository.GetRootCollectionsAsync(userId);
+        return _mapper.Map<IEnumerable<CollectionDTO>>(rootCollections);
+    }
 
-        public async Task<IEnumerable<CollectionDTO>> GetRootCollectionsAsync(int userId)
-        {
-            var rootCollections = await _repositoryManager.CollectionRepository.GetRootCollectionsAsync(userId);
-            return _mapper.Map<IEnumerable<CollectionDTO>>(rootCollections);
-        }
+    public async Task<IEnumerable<CollectionDTO>> GetSubCollectionsAsync(int parentId)
+    {
+        var subCollections = await _repositoryManager.CollectionRepository.GetSubCollectionsAsync(parentId);
+        return _mapper.Map<IEnumerable<CollectionDTO>>(subCollections);
+    }
 
-        public async Task<IEnumerable<CollectionDTO>> GetSubCollectionsAsync(int parentId)
-        {
-            var subCollections = await _repositoryManager.CollectionRepository.GetSubCollectionsAsync(parentId);
-            return _mapper.Map<IEnumerable<CollectionDTO>>(subCollections);
-        }
+    public async Task<CollectionDTO?> UpdateCollectionAsync(CollectionDTO dto)
+    {
+        var existing = await _repositoryManager.CollectionRepository.GetByIdAsync(dto.Id);
+        if (existing == null)
+            return null;
 
-       
+        existing.Name = dto.Name;
+        existing.Description = dto.Description;
+        existing.iconType = dto.IconType;
+        existing.ModifiedDate = DateTime.UtcNow;
+
+        await _repositoryManager.SaveAsync();
+        return _mapper.Map<CollectionDTO>(existing);
+    }
+
+    public async Task<CollectionDTO> SoftDeleteCollectionAsync(int id)
+    {
+        var folder = await _repositoryManager.CollectionRepository.GetByIdAsync(id);
+        if (folder == null)
+            return null;
+
+        await _repositoryManager.CollectionRepository.SoftDeleteRecursiveAsync(folder);
+        await _repositoryManager.SaveAsync();
+        return _mapper.Map<CollectionDTO>(folder);
     }
 }

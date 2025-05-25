@@ -1,63 +1,84 @@
-import React from "react"
-import { HardDrive, Calendar } from "lucide-react"
-import type { Material } from "../../../Models/Collection"
-import { formatFileSize } from "../../../utils/fileUtils"
+import React, { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { he } from "date-fns/locale";
+import { useSelector } from "react-redux";
+import { selectCategories } from "../../../slices/CategoriesSlice";
+import type { Material } from "../../../Models/Collection";
+import { Globe, Tag } from "lucide-react";
 
 interface FileDetailsProps {
-  file: Material
+  file: Material;
 }
 
-/**
- * FileDetails - קומפוננטה להצגת פרטי הקובץ
- */
 export const FileDetails: React.FC<FileDetailsProps> = ({ file }) => {
-  // פונקציה לקבלת סוג קובץ מפושט
-  const getSimplifiedFileType = () => {
-    const fileType = file.type?.toLowerCase() || ""
-    const fileExtension = file.name.split(".").pop()?.toLowerCase() || ""
+  const categories = useSelector(selectCategories);
+  const [categoryName, setCategoryName] = useState<string | null>(null);
+  
+  // מציאת שם הקטגוריה לפי הID
+  useEffect(() => {
+    if (file.categoryId && categories.length > 0) {
+      const category = categories.find(cat => cat.id === file.categoryId);
+      setCategoryName(category ? category.name : null);
+    }
+  }, [file.categoryId, categories]);
 
-    if (fileType.includes("image")) return "תמונה"
-    if (fileType.includes("video")) return "וידאו"
-    if (fileType.includes("audio")) return "אודיו"
-    if (fileType.includes("pdf") || fileExtension === "pdf") return "PDF"
-    if (fileType.includes("zip") || fileType.includes("rar")) return "ארכיון"
-    if (fileType.includes("html") || fileType.includes("css") || fileType.includes("javascript")) return "קוד"
-    if (fileType.includes("vnd.openxmlformats-officedocument.wordprocessingml")) return "DOCX"
-    if (fileType.includes("vnd.openxmlformats-officedocument.spreadsheetml")) return "XLSX"
-    if (fileType.includes("vnd.openxmlformats-officedocument.presentationml")) return "PPTX"
-    if (fileType.includes("msword")) return "DOC"
-    if (fileType.includes("ms-excel")) return "XLS"
-    if (fileType.includes("ms-powerpoint")) return "PPT"
-    if (fileType.includes("text")) return "טקסט"
+  // פורמט גודל קובץ
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + " B";
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    else if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    else return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+  };
 
-    // אם לא זוהה סוג ספציפי, החזר את סיומת הקובץ
-    return fileExtension.toUpperCase()
-  }
-
-  // פונקציה לפורמט תאריך
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return ""
-    const date = new Date(dateString)
-    return date.toLocaleDateString("he-IL", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    })
-  }
+  // פורמט תאריך
+  const formatDate = (dateString: string): string => {
+    try {
+      return format(new Date(dateString), "dd בMMM yyyy", { locale: he });
+    } catch (error) {
+      return "תאריך לא תקין";
+    }
+  };
 
   return (
-    <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
-      <div className="flex items-center gap-1">
-        <HardDrive className="h-3 w-3" />
-        <span>{formatFileSize(file.size)}</span>
+    <div className="text-xs text-gray-500 space-y-1">
+      <div className="flex justify-between">
+        <span>סוג:</span>
+        <span className="font-medium">{file.type}</span>
       </div>
-      <div className="flex items-center gap-1 justify-end">
-        <span>{getSimplifiedFileType()}</span>
+      
+      <div className="flex justify-between">
+        <span>גודל:</span>
+        <span className="font-medium">{formatFileSize(file.size)}</span>
       </div>
-      <div className="flex items-center gap-1 col-span-2">
-        <Calendar className="h-3 w-3" />
-        <span>{formatDate(file.createdDate)}</span>
+      
+      <div className="flex justify-between">
+        <span>תאריך יצירה:</span>
+        <span className="font-medium">{formatDate(file.createdDate)}</span>
       </div>
+      
+      {/* מידע על שיתוף */}
+      {file.isPublic && (
+        <>
+          <div className="flex justify-between items-center">
+            <span className="flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              סטטוס:
+            </span>
+            <span className="font-medium text-indigo-600">משותף</span>
+          </div>
+          
+          {/* הצגת קטגוריה אם קיימת */}
+          {categoryName && (
+            <div className="flex justify-between items-center">
+              <span className="flex items-center gap-1">
+                <Tag className="h-3 w-3" />
+                קטגוריה:
+              </span>
+              <span className="font-medium text-indigo-600">{categoryName}</span>
+            </div>
+          )}
+        </>
+      )}
     </div>
-  )
-}
+  );
+};

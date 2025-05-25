@@ -26,9 +26,9 @@ const ViewFileModal: React.FC<ViewFileModalProps> = ({ file, open, onOpenChange 
   const [fileViewUrl, setFileViewUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
   const { handleDownloadFile } = useFileDownload(file)
 
+  
   // Fetch view URL when component mounts
   useEffect(() => {
     const fetchViewUrl = async () => {

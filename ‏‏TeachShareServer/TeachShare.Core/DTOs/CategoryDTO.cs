@@ -12,7 +12,7 @@ namespace TeachShare.Core.DTOs
     {
         public int Id { get; set; } // מספר מזהה ייחודי
         public string Name { get; set; } // שם הקטגוריה
-        public string Description { get; set; } // תיאור הקטגוריה
+        //public string Description { get; set; } // תיאור הקטגוריה
     }
 
     //public class Category

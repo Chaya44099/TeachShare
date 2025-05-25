@@ -198,40 +198,56 @@ namespace TeachShare.Service.Services
             return _mapper.Map<MaterialDTO>(materialEntityAdded);
         }
 
-        public async Task<bool> DeleteMaterialAsync(int materialId)
+        public async Task<MaterialDTO> SoftDeleteFileAsync(int id)
         {
-            var material = await _repositoryManager.MaterialRepository.GetByIdAsync(materialId);
-            if (material == null) return false;
+            var material = await _repositoryManager.MaterialRepository.GetByIdAsync(id);
+            if (material == null)
+                return null;
 
-            // Delete from S3
-            try
-            {
-                var deleteRequest = new DeleteObjectRequest
-                {
-                    BucketName = "myteacherbubket.testpnoren",
-                    Key = material.S3Key
-                };
-                await _s3Client.DeleteObjectAsync(deleteRequest);
-            }
-            catch (Exception)
-            {
-                // Log the exception but continue with soft delete
-            }
-
-            // Soft delete in database - במחיקה רכה
-            material.IsDeleted = true;
-            material.DeletedDate = DateTime.UtcNow;
-            await _repositoryManager.MaterialRepository.UpdateAsync(materialId, material);
+            await _repositoryManager.MaterialRepository.SoftDeleteAsync(material);
             await _repositoryManager.SaveAsync();
-            return true;
+
+            return _mapper.Map<MaterialDTO>(material);
         }
+
 
         public async Task<IEnumerable<MaterialDTO>> GetFilesByOwnerAsync(int userId)
         {
             var files = await _repositoryManager.MaterialRepository.GetFilesByOwnerAsync(userId);
             return _mapper.Map<IEnumerable<MaterialDTO>>(files);
         }
+        public async Task<MaterialDTO> ShareMaterialAsync(int id, ShareMaterialDTO dto)
+        {
+            var material = await _repositoryManager.MaterialRepository.GetByIdAsync(id);
+            if (material == null)
+                throw new Exception("Material not found");
 
-       
+            material.IsPublic = dto.IsPublic;
+            material.CategoryId = dto.CategoryId;
+            material.ModifiedDate = DateTime.UtcNow;
+
+            //await _repositoryManager.MaterialRepository.UpdateAsync(id, material);
+            await _repositoryManager.SaveAsync();
+
+            return _mapper.Map<MaterialDTO>(material);
+        }
+
+        public async Task<IEnumerable<MaterialDTO>> GetMaterialsByCategoryAsync(int categoryId)
+        {
+            var materials = await _repositoryManager.MaterialRepository.FindAllAsync(m => m.CategoryId == categoryId && m.IsPublic && !m.IsDeleted);
+
+            return _mapper.Map<IEnumerable<MaterialDTO>>(materials);
+        }
+        public async Task<Material?> RenameMaterialAsync(int id, string newName)
+        {
+            var material = await _repositoryManager.MaterialRepository.GetByIdAsync(id);
+            if (material == null)
+                return null;
+
+            material.Name = newName;
+            await _repositoryManager.SaveAsync();
+            return material;
+        }
+
     }
 }

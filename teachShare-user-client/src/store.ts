@@ -4,12 +4,15 @@ import authReducer from './slices/authSlice';
 import collectionReducer from './slices/CollectionSlice';
 
 import materialReducer from './slices/MaterialSlice';
+import categoriesReducer from './slices/CategoriesSlice';
+
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     collection: collectionReducer,
     material: materialReducer,
+    categories: categoriesReducer,
   },
 });
 

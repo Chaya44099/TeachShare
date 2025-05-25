@@ -22,9 +22,37 @@ namespace TeachShare.Data
         public DbSet<Rating> Ratings { get; set; } // טבלת דירוגים
         public DbSet<Collection> Collections { get; set; } // טבלת אוספים
 
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<Collection>().HasQueryFilter(c => !c.IsDeleted);
+        //    modelBuilder.Entity<Material>().HasQueryFilter(m => !m.IsDeleted);
+
+        //    modelBuilder.Entity<Rating>()
+        //        .HasOne(r => r.Material)
+        //        .WithMany()
+        //        .HasForeignKey(r => r.MaterialId)
+        //        .IsRequired(false);
+
+        //    modelBuilder.Entity<Rating>()
+        //        .HasQueryFilter(r => !r.Material.IsDeleted);
+
+        //    modelBuilder.Entity<Material>()
+        //        .HasOne(m => m.User)
+        //        .WithMany(u => u.Materials)
+        //        .HasForeignKey(m => m.UserId)
+        //        .OnDelete(DeleteBehavior.NoAction);
+
+        //    modelBuilder.Entity<Collection>()
+        //        .HasOne(c => c.User)
+        //        .WithMany(u => u.Collections)
+        //        .HasForeignKey(c => c.UserId)
+        //        .OnDelete(DeleteBehavior.NoAction);
+        //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Collection>().HasQueryFilter(c => !c.IsDeleted);
+            modelBuilder.Entity<Material>().HasQueryFilter(m => !m.IsDeleted);
             modelBuilder.Entity<Material>()
                 .HasOne(m => m.User)
                 .WithMany(u => u.Materials)
@@ -37,11 +65,11 @@ namespace TeachShare.Data
                 .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.NoAction); // מונע מחיקת אוספים אם משתמש נמחק
 
-            modelBuilder.Entity<Collection>()
-                .HasOne(c => c.ParentCollection)
-                .WithMany(c => c.SubCollections)
-                .HasForeignKey(c => c.ParentCollectionId)
-                .OnDelete(DeleteBehavior.NoAction); // מונע מחיקת אוסף הורה ומחיקת כל התת-אוספים
+            //modelBuilder.Entity<Collection>()
+            //    .HasOne(c => c.ParentCollection)
+            //    .WithMany(c => c.SubCollections)
+            //    .HasForeignKey(c => c.ParentCollectionId)
+            //    .OnDelete(DeleteBehavior.NoAction); // מונע מחיקת אוסף הורה ומחיקת כל התת-אוספים
 
             // הגדרת הקשרים בין הטבלאות
             //modelBuilder.Entity<UserDTO>()

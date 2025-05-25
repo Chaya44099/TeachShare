@@ -24,8 +24,13 @@ namespace TeachShare.Core.Iservices
         Task<IEnumerable<MaterialDTO>> GetAllMaterialsAsync();
         Task<MaterialDTO> GetMaterialByIdAsync(int materialId);
         Task<MaterialDTO> CreateMaterialAsync(MaterialDTO material);
-        Task<bool> DeleteMaterialAsync(int materialId);
+        //Task<bool> DeleteMaterialAsync(int materialId);
         Task<IEnumerable<MaterialDTO>> GetFilesByOwnerAsync(int userId);
         Task<IEnumerable<MaterialDTO>> GetMaterialsByFolderAsync(int folderId);
+        Task<MaterialDTO> ShareMaterialAsync(int id, ShareMaterialDTO dto);
+
+        Task<IEnumerable<MaterialDTO>> GetMaterialsByCategoryAsync(int categoryId);
+        Task<MaterialDTO> SoftDeleteFileAsync(int id);
+        Task<Material?> RenameMaterialAsync(int id, string newName);
     }
 }

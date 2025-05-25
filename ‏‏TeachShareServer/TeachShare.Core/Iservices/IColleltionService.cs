@@ -22,5 +22,7 @@ namespace TeachShare.Core.Iservices
         Task<CollectionDTO> CreateCollectionAsync(CollectionDTO collectionDto);
         Task<IEnumerable<CollectionDTO>> GetRootCollectionsAsync(int userId);
         Task<IEnumerable<CollectionDTO>> GetSubCollectionsAsync(int parentId);
+        Task<CollectionDTO?> UpdateCollectionAsync(CollectionDTO updateDto);
+        Task<CollectionDTO> SoftDeleteCollectionAsync(int id);
     }
 }

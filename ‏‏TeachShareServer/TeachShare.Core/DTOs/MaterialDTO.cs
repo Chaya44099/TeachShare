@@ -15,9 +15,13 @@ namespace TeachShare.Core.DTOs
         public string Name { get; set; }
         public string Type { get; set; }
         public long Size { get; set; }
-        public string AwsUrl { get; set; }
+        //public string AwsUrl { get; set; }
         public string S3Key { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
         public DateTime CreatedDate { get; set; }
+        //public DateTime? ModifiedDate { get; set; }
+        public bool IsPublic { get; set; } = false;
         public int? CollectionID { get; set; }
         public int UserId { get; set; }
 
