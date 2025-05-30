@@ -48,10 +48,11 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddSingleton(sp =>
 //    builder.Configuration.GetValue<string>("AWS:BucketName")
 //);
+var connectionString = builder.Configuration.GetConnectionString("TeachShare");
 
 // DataContext Configuration
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(connectionString, ServerVersion.Parse("8.0.32-mysql")));
 
 // Dependency Injection for Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
