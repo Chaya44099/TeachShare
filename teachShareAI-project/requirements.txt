@@ -5,3 +5,4 @@ openai
 docx
 PyPDF2
 httpx
+requests
