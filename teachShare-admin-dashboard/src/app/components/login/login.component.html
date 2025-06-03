@@ -1,0 +1,129 @@
+<div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 flex items-center justify-center p-4" dir="rtl">
+    <div class="max-w-md w-full">
+      <!-- Logo and Title -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 flex items-center justify-center shadow-lg mb-4">
+          <i-lucide name="star" class="w-8 h-8 text-white"></i-lucide>
+        </div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          TEACH SHARE
+        </h1>
+        <p class="text-gray-600 mt-2">התחברות למערכת</p>
+      </div>
+  
+      <!-- Success Message -->
+      @if (successMessage()) {
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center">
+            <i-lucide name="check-circle" class="h-5 w-5 text-green-500 ml-2"></i-lucide>
+            <span class="text-green-700 text-sm">{{ successMessage() }}</span>
+          </div>
+        </div>
+      }
+  
+      <!-- Login Form -->
+      <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-8 border border-gray-200">
+        <form (ngSubmit)="onSubmit()" class="space-y-6">
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+              כתובת אימייל
+            </label>
+            <div class="relative">
+              <input
+                id="email"
+                type="email"
+                [value]="credentials().email"
+                (input)="updateCredentials('email', $any($event.target).value)"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                placeholder="teacher@example.com"
+                required
+              />
+              <i-lucide name="mail" class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"></i-lucide>
+            </div>
+          </div>
+  
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+              סיסמה
+            </label>
+            <div class="relative">
+              <input
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                [value]="credentials().password"
+                (input)="updateCredentials('password', $any($event.target).value)"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors pl-12"
+                placeholder="הכנס סיסמה"
+                required
+              />
+              <button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                @if (showPassword()) {
+                  <i-lucide name="eye-off" class="h-5 w-5"></i-lucide>
+                } @else {
+                  <i-lucide name="eye" class="h-5 w-5"></i-lucide>
+                }
+              </button>
+            </div>
+          </div>
+  
+          <!-- Error Message -->
+          @if (authService.error()) {
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center">
+              <i-lucide name="alert-circle" class="h-5 w-5 text-red-500 ml-2"></i-lucide>
+              <span class="text-red-700 text-sm">{{ authService.error() }}</span>
+            </div>
+          }
+  
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            [disabled]="authService.loading()"
+            class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center"
+          >
+            @if (authService.loading()) {
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              מתחבר...
+            } @else {
+              <i-lucide name="log-in" class="w-5 h-5 ml-2"></i-lucide>
+              התחבר
+            }
+          </button>
+        </form>
+  
+        <!-- Register Link -->
+        <div class="mt-6 text-center">
+          <p class="text-gray-600 text-sm">
+            עדיין אין לך חשבון?
+            <button
+              (click)="goToRegister()"
+              class="text-purple-600 hover:text-purple-700 font-medium ml-1"
+            >
+              הירשם כאן
+            </button>
+          </p>
+        </div>
+  
+        <!-- Demo Credentials -->
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <h4 class="text-sm font-medium text-blue-800 mb-2">פרטי התחברות לדמו:</h4>
+          <div class="text-sm text-blue-700 space-y-1">
+            <p><strong>אימייל:</strong> admin teachshare.com</p>
+            <p><strong>סיסמה:</strong> admin123</p>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Footer -->
+      <div class="text-center mt-8 text-gray-500 text-sm">
+        <p>© 2025 Teach Share. כל הזכויות שמורות.</p>
+      </div>
+    </div>
+  </div>
+  

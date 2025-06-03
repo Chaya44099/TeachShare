@@ -1,0 +1,32 @@
+<header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4 space-x-reverse">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          Angular 19 Dashboard
+        </h1>
+        <span class="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full flex items-center">
+          <div class="w-2 h-2 bg-white rounded-full ml-1 animate-pulse"></div>
+          Standalone Ready
+        </span>
+      </div>
+  
+      <div class="flex items-center space-x-4 space-x-reverse">
+        <div class="relative">
+          <i-lucide name="search" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i-lucide>
+          <input 
+            type="text" 
+            placeholder="חיפוש..." 
+            class="pr-10 w-64 px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors"
+            [(ngModel)]="searchTerm"
+          />
+        </div>
+        <button class="p-2 border border-gray-300 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+          <i-lucide name="bell" class="h-4 w-4"></i-lucide>
+        </button>
+        <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-purple-200">
+          מנ
+        </div>
+      </div>
+    </div>
+  </header>
+  

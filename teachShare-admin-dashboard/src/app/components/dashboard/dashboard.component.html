@@ -1,0 +1,146 @@
+<main class="p-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-in-up">
+      <!-- Total Users Card -->
+      <div class="border-0 shadow-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white overflow-hidden relative rounded-lg p-6">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+        <div class="flex items-center justify-between mb-2 relative z-10">
+          <h3 class="text-sm font-medium text-purple-100">סך הכל משתמשים</h3>
+          <i-lucide name="users" class="h-6 w-6 text-white"></i-lucide>
+        </div>
+        <div class="relative z-10">
+          <div class="text-3xl font-bold">
+            {{ stats()?.totalUsers || 'טוען...' }}
+          </div>
+          <p class="text-xs text-purple-200">
+            פעילים: {{ stats()?.activeUsers || '...' }}
+          </p>
+        </div>
+      </div>
+  
+      <!-- Total Files Card -->
+      <div class="border-0 shadow-lg bg-gradient-to-br from-green-500 to-emerald-600 text-white overflow-hidden relative rounded-lg p-6">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+        <div class="flex items-center justify-between mb-2 relative z-10">
+          <h3 class="text-sm font-medium text-green-100">סך הכל קבצים</h3>
+          <i-lucide name="file-text" class="h-6 w-6 text-white"></i-lucide>
+        </div>
+        <div class="relative z-10">
+          <div class="text-3xl font-bold">
+            {{ stats()?.totalFiles || 'טוען...' }}
+          </div>
+          <p class="text-xs text-green-200">
+            מאושרים: {{ stats()?.approvedFiles || '...' }}
+          </p>
+        </div>
+      </div>
+  
+      <!-- Downloads Card -->
+      <div class="border-0 shadow-lg bg-gradient-to-br from-orange-500 to-yellow-500 text-white overflow-hidden relative rounded-lg p-6">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+        <div class="flex items-center justify-between mb-2 relative z-10">
+          <h3 class="text-sm font-medium text-orange-100">הורדות</h3>
+          <i-lucide name="download" class="h-6 w-6 text-white"></i-lucide>
+        </div>
+        <div class="relative z-10">
+          <div class="text-3xl font-bold">
+            {{ stats()?.totalDownloads || 'טוען...' }}
+          </div>
+          <p class="text-xs text-orange-200">
+            היום: {{ stats()?.todayDownloads || '...' }}
+          </p>
+        </div>
+      </div>
+  
+      <!-- Pending Files Card -->
+      <div class="border-0 shadow-lg bg-gradient-to-br from-pink-500 to-rose-600 text-white overflow-hidden relative rounded-lg p-6">
+        <div class="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+        <div class="flex items-center justify-between mb-2 relative z-10">
+          <h3 class="text-sm font-medium text-pink-100">ממתינים לאישור</h3>
+          <i-lucide name="user-check" class="h-6 w-6 text-white"></i-lucide>
+        </div>
+        <div class="relative z-10">
+          <div class="text-3xl font-bold">
+            {{ stats()?.pendingFiles || 'טוען...' }}
+          </div>
+          <p class="text-xs text-pink-200">דורש טיפול</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Storage Usage -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="border-0 shadow-lg bg-white/80 backdrop-blur-sm rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <i-lucide name="hard-drive" class="ml-2 h-5 w-5 text-blue-600"></i-lucide>
+          שימוש באחסון
+        </h3>
+        <div class="space-y-2">
+          <div class="flex justify-between text-sm">
+            <span>בשימוש</span>
+            <span>{{ formatBytes(stats()?.storageUsed || 0) }}</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+              [style.width.%]="getStoragePercentage()"
+            ></div>
+          </div>
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>{{ getStoragePercentage() }}% בשימוש</span>
+            <span>מתוך {{ formatBytes(stats()?.storageLimit || 0) }}</span>
+          </div>
+        </div>
+      </div>
+  
+      <div class="border-0 shadow-lg bg-white/80 backdrop-blur-sm rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4 flex items-center">
+          <i-lucide name="activity" class="ml-2 h-5 w-5 text-green-600"></i-lucide>
+          סטטוס מערכת
+        </h3>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-sm">חיבור לשרת</span>
+            <span class="flex items-center text-green-600">
+              <div class="w-2 h-2 bg-green-500 rounded-full ml-2 animate-pulse"></div>
+              מחובר
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm">מסד נתונים</span>
+            <span class="flex items-center text-green-600">
+              <div class="w-2 h-2 bg-green-500 rounded-full ml-2"></div>
+              פעיל
+            </span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-sm">גיבוי אחרון</span>
+            <span class="text-sm text-gray-500">{{ getLastBackupTime() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Loading State -->
+    @if (apiService.loading()) {
+      <div class="text-center py-8">
+        <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-purple-500">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          טוען נתונים...
+        </div>
+      </div>
+    }
+  
+    <!-- Error State -->
+    @if (apiService.error()) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+          <i-lucide name="alert-circle" class="h-5 w-5 text-red-500 ml-2"></i-lucide>
+          <span class="text-red-700">{{ apiService.error() }}</span>
+        </div>
+      </div>
+    }
+  </main>

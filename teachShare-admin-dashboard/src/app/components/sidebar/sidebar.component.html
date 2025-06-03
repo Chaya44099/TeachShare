@@ -1,0 +1,35 @@
+<div class="w-64 bg-white shadow-xl border-l border-gray-200 relative overflow-hidden">
+    <!-- Gradient Background -->
+    <div class="absolute inset-0 bg-gradient-to-b from-purple-600 via-blue-600 to-cyan-600 opacity-5"></div>
+  
+    <div class="relative z-10 p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+          <i-lucide name="star" class="w-6 h-6 text-white"></i-lucide>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            TEACH SHARE
+          </h2>
+          <p class="text-sm text-gray-500">Angular 19 Admin</p>
+        </div>
+      </div>
+    </div>
+  
+    <nav class="mt-6 relative z-10">
+      <div class="px-4 space-y-2">
+        @for (item of menuItems(); track item.id) {
+          <a 
+            [routerLink]="item.route"
+            routerLinkActive="active-menu-item"
+            [class]="getButtonClass(item)"
+            class="w-full flex items-center px-4 py-3 text-right rounded-lg transition-all duration-200 group"
+          >
+            <i-lucide [name]="item.icon" class="ml-2 h-4 w-4"></i-lucide>
+            <span>{{ item.label }}</span>
+          </a>
+        }
+      </div>
+    </nav>
+  </div>
+  

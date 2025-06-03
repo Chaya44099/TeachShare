@@ -1,0 +1,33 @@
+.sidebar-transition {
+    transition: all 0.3s ease;
+  }
+  
+  .content-transition {
+    transition: all 0.3s ease;
+  }
+  
+  .header-blur {
+    backdrop-filter: blur(8px);
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .5;
+    }
+  }
+  
+  .bg-clip-text {
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  
+  .text-transparent {
+    color: transparent;
+  }

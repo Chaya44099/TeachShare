@@ -1,0 +1,87 @@
+<div class="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 flex" dir="rtl">
+  <!-- Sidebar -->
+  <div class="w-64 bg-white shadow-xl border-l border-gray-200 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-purple-600 via-blue-600 to-cyan-600 opacity-5"></div>
+
+    <div class="relative z-10 p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+          <i-lucide name="star" class="w-6 h-6 text-white"></i-lucide>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            TEACH SHARE
+          </h2>
+          <p class="text-sm text-gray-500">ממשק ניהול</p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="mt-6 relative z-10">
+      <div class="px-4 space-y-2">
+        @for (item of menuItems(); track item.id) {
+          <button 
+            (click)="setActiveTab(item.id)"
+            [class]="getButtonClass(item.id)"
+          >
+            <i-lucide [name]="item.icon" class="ml-2 h-4 w-4"></i-lucide>
+            <span>{{item.label}}</span>
+          </button>
+        }
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-hidden">
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4 space-x-reverse">
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            {{ getPageTitle() }}
+          </h1>
+          <span class="px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full flex items-center">
+            <div class="w-2 h-2 bg-white rounded-full ml-1 animate-pulse"></div>
+            מחובר
+          </span>
+        </div>
+
+        <div class="flex items-center space-x-4 space-x-reverse">
+          <div class="relative">
+            <i-lucide name="search" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i-lucide>
+            <input 
+              type="text" 
+              placeholder="חיפוש..." 
+              class="pr-10 w-64 px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-colors"
+            />
+          </div>
+          <button class="p-2 border border-gray-300 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 transition-all duration-200">
+            <i-lucide name="bell" class="h-4 w-4"></i-lucide>
+          </button>
+          <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-medium text-sm ring-2 ring-purple-200">
+            Admin
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="p-6">
+      @switch (activeTab()) {
+        @case ('dashboard') {
+          <app-dashboard></app-dashboard>
+        }
+        @case ('files') {
+          <app-files></app-files>
+        }
+        @case ('users') {
+          <app-users></app-users>
+        }
+        @case ('categories') {
+          <app-categories></app-categories>
+        }
+      }
+    </main>
+  </div>
+</div>

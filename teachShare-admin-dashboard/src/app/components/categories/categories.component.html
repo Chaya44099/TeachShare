@@ -1,0 +1,276 @@
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold">ניהול קטגוריות</h2>
+      <button 
+        (click)="openCreateCategoryModal()"
+        class="px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-lg flex items-center"
+      >
+        <i-lucide name="plus" class="w-4 h-4 ml-2"></i-lucide>
+        הוסף קטגוריה
+      </button>
+    </div>
+  
+    <!-- Categories Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (category of categories(); track trackByCategoryId($index, category)) {
+        <div class="border-0 shadow-lg bg-white/80 backdrop-blur-sm rounded-lg p-6 hover:shadow-xl transition-all duration-200">
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex items-center">
+              <div class="p-3 rounded-lg bg-gradient-to-br from-orange-100 to-yellow-100 ml-3">
+                <i-lucide name="folder-open" class="h-6 w-6 text-orange-600"></i-lucide>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">{{ category.name }}</h3>
+                <p class="text-sm text-gray-500">{{ category.fileCount }} קבצים</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-1 space-x-reverse">
+              <button 
+                (click)="editCategory(category)"
+                class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                title="ערוך קטגוריה"
+              >
+                <i-lucide name="edit" class="h-4 w-4"></i-lucide>
+              </button>
+              
+              <button 
+                (click)="deleteCategory(category.id)"
+                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                title="מחק קטגוריה"
+              >
+                <i-lucide name="trash-2" class="h-4 w-4"></i-lucide>
+              </button>
+            </div>
+          </div>
+          
+          @if (category.description) {
+            <div class="mb-4">
+              <p class="text-sm text-gray-600">{{ category.description }}</p>
+            </div>
+          }
+          
+          <div class="flex items-center justify-between text-xs text-gray-500">
+            <span>נוצר: {{ formatDate(category.createdAt) }}</span>
+            <span 
+              class="px-2 py-1 rounded-full"
+              [ngClass]="{
+                'bg-green-100 text-green-800': category.isActive,
+                'bg-red-100 text-red-800': !category.isActive
+              }"
+            >
+              {{ category.isActive ? 'פעיל' : 'לא פעיל' }}
+            </span>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-span-full">
+          <div class="text-center py-12">
+            <i-lucide name="folder-open" class="mx-auto h-16 w-16 mb-4 text-gray-300"></i-lucide>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">אין קטגוריות</h3>
+            <p class="text-gray-500 mb-4">התחל על ידי יצירת קטגוריה ראשונה</p>
+            <button 
+              (click)="openCreateCategoryModal()"
+              class="px-4 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-lg"
+            >
+              צור קטגוריה
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  
+    <!-- Create/Edit Category Modal -->
+    @if (showCategoryModal()) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100">
+          <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-bold text-gray-900">
+                {{ editingCategory() ? 'ערוך קטגוריה' : 'הוסף קטגוריה חדשה' }}
+              </h3>
+              <button 
+                (click)="closeCategoryModal()" 
+                class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors"
+              >
+                <i-lucide name="x" class="h-5 w-5"></i-lucide>
+              </button>
+            </div>
+            
+            <form (ngSubmit)="saveCategory()" #categoryForm="ngForm">
+              <div class="space-y-5">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">שם הקטגוריה</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="categoryFormData.name"
+                    name="name"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-colors"
+                    placeholder="הכנס שם קטגוריה"
+                  />
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">תיאור (אופציונלי)</label>
+                  <textarea 
+                    [(ngModel)]="categoryFormData.description"
+                    name="description"
+                    rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-colors resize-none"
+                    placeholder="הכנס תיאור לקטגוריה"
+                  ></textarea>
+                </div>
+                
+                <div class="flex items-center">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="categoryFormData.isActive"
+                    name="isActive"
+                    id="categoryIsActive"
+                    class="ml-3 w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <label for="categoryIsActive" class="text-sm font-medium text-gray-700">קטגוריה פעילה</label>
+                </div>
+              </div>
+              
+              <div class="flex justify-end space-x-3 space-x-reverse mt-8">
+                <button 
+                  type="button"
+                  (click)="closeCategoryModal()"
+                  class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  ביטול
+                </button>
+                <button 
+                  type="submit"
+                  [disabled]="!categoryForm.valid || apiService.loading()"
+                  class="px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+                >
+                  @if (apiService.loading()) {
+                    <div class="flex items-center">
+                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      שומר...
+                    </div>
+                  } @else {
+                    {{ editingCategory() ? 'עדכן' : 'הוסף' }}
+                  }
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    }
+  
+    <!-- Warning Modal (Category has files) -->
+    @if (showWarningModal()) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-100">
+          <div class="p-6">
+            <!-- Warning Icon -->
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-yellow-100 rounded-full">
+              <i-lucide name="alert-triangle" class="w-8 h-8 text-yellow-600"></i-lucide>
+            </div>
+            
+            <div class="text-center mb-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-3">אזהרה - קטגוריה מכילה קבצים</h3>
+              <p class="text-gray-600 leading-relaxed">{{ warningMessage() }}</p>
+            </div>
+            
+            <div class="flex justify-center space-x-3 space-x-reverse">
+              <button 
+                (click)="closeWarningModal()"
+                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                ביטול
+              </button>
+              <button 
+                (click)="proceedWithDelete()"
+                class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg transition-all font-medium"
+              >
+                המשך בכל זאת
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  
+    <!-- Delete Confirmation Modal -->
+    @if (showDeleteModal()) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100">
+          <div class="p-6">
+            <!-- Delete Icon -->
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full">
+              <i-lucide name="trash-2" class="w-8 h-8 text-red-600"></i-lucide>
+            </div>
+            
+            <div class="text-center mb-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-3">אישור מחיקת קטגוריה</h3>
+              <p class="text-gray-600">
+                האם אתה בטוח שברצונך למחוק את הקטגוריה 
+                <span class="font-semibold text-gray-900">"{{ categoryToDelete()?.name }}"</span>?
+              </p>
+              <p class="text-sm text-red-600 mt-2 font-medium">פעולה זו לא ניתנת לביטול!</p>
+            </div>
+            
+            <div class="flex justify-center space-x-3 space-x-reverse">
+              <button 
+                (click)="closeDeleteModal()"
+                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                ביטול
+              </button>
+              <button 
+                (click)="confirmDelete()"
+                [disabled]="apiService.loading()"
+                class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium"
+              >
+                @if (apiService.loading()) {
+                  <div class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    מוחק...
+                  </div>
+                } @else {
+                  מחק קטגוריה
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  
+    <!-- Loading State -->
+    @if (apiService.loading() && !showCategoryModal() && !showDeleteModal()) {
+      <div class="text-center py-8">
+        <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-orange-500">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          טוען קטגוריות...
+        </div>
+      </div>
+    }
+  
+    <!-- Error State -->
+    @if (apiService.error()) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div class="flex items-center">
+          <i-lucide name="alert-circle" class="h-5 w-5 text-red-500 ml-2"></i-lucide>
+          <span class="text-red-700">{{ apiService.error() }}</span>
+        </div>
+      </div>
+    }
+  </div>
+  
