@@ -44,13 +44,13 @@ const RenameFileModal: React.FC<RenameFileModalProps> = ({ file, open, onOpenCha
   }
 
   // פונקציה לקבלת שם הקובץ ללא סיומת
-  const getFileNameWithoutExtension = (filename: string): string => {
-    const extension = getFileExtension(filename)
-    return extension ? filename.slice(0, filename.length - extension.length) : filename
-  }
+  // const getFileNameWithoutExtension = (filename: string): string => {
+  //   const extension = getFileExtension(filename)
+  //   return extension ? filename.slice(0, filename.length - extension.length) : filename
+  // }
 
   const fileExtension = getFileExtension(file.name)
-  const fileNameWithoutExt = getFileNameWithoutExtension(file.name)
+  // const fileNameWithoutExt = getFileNameWithoutExtension(file.name)
 
   // פונקציה לשינוי שם הקובץ
   const handleRename = async () => {

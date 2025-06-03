@@ -76,7 +76,7 @@ const SharedMaterials: React.FC = () => {
       console.error("שגיאה בהורדת הקובץ:", error)
     }
   }
-  const handleGenerateQuestions = async (s3Key: string, fileName: string) => {
+  const handleGenerateQuestions = async (s3Key: string) => {
     setQuestions(null)
     setQuestionsError(null)
     setQuestionsLoading(true)
@@ -112,7 +112,7 @@ const SharedMaterials: React.FC = () => {
   }
 
   // פונקציה לסיכום קובץ
-  const handleSummarize = async (s3Key: string, fileName: string) => {
+  const handleSummarize = async (s3Key: string) => {
     setSummary(null)
     setSummaryError(null)
     setSummaryLoading(true)
@@ -291,7 +291,7 @@ const SharedMaterials: React.FC = () => {
                         <span>צפייה</span>
                       </button>
                       <button
-                        onClick={() => handleGenerateQuestions(material.s3Key, material.name)}
+                        onClick={() => handleGenerateQuestions(material.s3Key)}
                         className="flex items-center space-x-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
                         disabled={questionsLoading}
                       >
@@ -300,7 +300,7 @@ const SharedMaterials: React.FC = () => {
                       </button>
 
                       <button
-                        onClick={() => handleSummarize(material.s3Key, material.name)}
+                        onClick={() => handleSummarize(material.s3Key)}
                         className="flex items-center space-x-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
                         disabled={summaryLoading}
                       >
