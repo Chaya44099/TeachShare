@@ -2,7 +2,7 @@
 flask-cors
 python-dotenv
 openai
-docx
+python-docx
 PyPDF2
 httpx
 requests
