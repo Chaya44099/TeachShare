@@ -21,33 +21,7 @@ using TeachShare.Data.Seed;
 using TeachShare.Api;
 
 var builder = WebApplication.CreateBuilder(args);
-//var credentials = new BasicAWSCredentials(
-//    builder.Configuration["AWS:AccessKey"],
-//    builder.Configuration["AWS:SecretKey"]
-//);
-//var region = Amazon.RegionEndpoint.GetBySystemName(builder.Configuration["AWS:Region"]); // בדקי שהאזור נכון
 
-//var s3Client = new AmazonS3Client(credentials, region);
-
-//builder.Services.AddSingleton<IAmazonS3>(s3Client);
-// AWS S3 Configuration
-//builder.Services.AddSingleton<IAmazonS3>(sp =>
-//{
-//    var awsConfig = builder.Configuration.GetSection("AWS");
-//    var credentials = new BasicAWSCredentials(
-//        awsConfig["AccessKey"],
-//        awsConfig["SecretKey"]
-//    );
-
-//    var regionEndpoint = RegionEndpoint.GetBySystemName(awsConfig["Region"]);
-
-//    return new AmazonS3Client(credentials, regionEndpoint);
-//});
-//builder.Services.AddAWSService<IAmazonS3>();
-// Add bucket name as a singleton service for easy injectionמה זה???
-//builder.Services.AddSingleton(sp =>
-//    builder.Configuration.GetValue<string>("AWS:BucketName")
-//);
 var connectionString = builder.Configuration.GetConnectionString("TeachShare");
 
 // DataContext Configuration
@@ -75,19 +49,18 @@ builder.Services.AddScoped<DataSeeder>();
 // AutoMapper Configuration
 builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MappingProfilePostModel));
 
-// CORS Configuration
+// CORS Configuration - מאפשר קריאות מכל מקור (אפשר לצמצם לפי הצורך)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        //policy.WithOrigins("http://localhost:3000", "http://localhost:3001") // הוספת גם את 3001
-        //      .AllowAnyMethod()
-        //      .AllowAnyHeader()
-        //      .AllowCredentials();
         policy.SetIsOriginAllowed(_ => true)
-        .AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
+
 // Controllers Configuration
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -95,7 +68,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
-// Swagger Configuration
+// Swagger Configuration (רק בסביבת פיתוח)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -143,6 +116,8 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
     };
 });
+
+// AWS Configuration (נשאיר כמו שהיה)
 builder.Services.AddDefaultAWSOptions(new AWSOptions
 {
     Credentials = new BasicAWSCredentials(
@@ -151,21 +126,20 @@ builder.Services.AddDefaultAWSOptions(new AWSOptions
     ),
     Region = RegionEndpoint.GetBySystemName(builder.Configuration["AWS:Region"])
 });
-
-// רישום שירות S3
 builder.Services.AddAWSService<IAmazonS3>();
-
 
 var app = builder.Build();
 
+// Seeder הרצה בזמן האתחול
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var seeder = services.GetRequiredService<DataSeeder>();
     await seeder.SeedCategoriesAsync();
 }
-// Swagger and Development Configuration
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+
+// Swagger רק בסביבת פיתוח
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -176,13 +150,24 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     });
 }
 
-// Middleware Configuration
+// אם תרצי לשרת React סטטית (לדוגמה מתיקיית build), תוסיף את השורות הבאות:
 
-app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
+// app.UseDefaultFiles();  
+// app.UseStaticFiles();  
+// app.MapFallbackToFile("index.html");
+
+// אחרת פשוט:
+
+app.MapGet("/", () => "TeachShare API is running...");
+
+// Middleware Configuration
 app.UseHttpsRedirection();
+
 app.UseCors("AllowReactApp");
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
