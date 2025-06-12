@@ -1,22 +1,18 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Navbar from './Navbar';
-import Footer from './Footer';
+import React from "react"
+import { Outlet } from "react-router-dom"
+import Navbar from "./Navbar"
+import Footer from "./Footer"
 
-/**
- * AppLayout - Main layout container for the application.
- * Wraps the entire app with common Navbar and Footer components.
- */
 const AppLayout: React.FC = () => {
   return (
-    <div className="app-container">
+    <div className="min-h-screen bg-background" dir="rtl">
       <Navbar />
-      <main className="main-content">
+      <main className="pt-20">
         <Outlet />
       </main>
       <Footer />
     </div>
-  );
-};
+  )
+}
 
-export default AppLayout;
+export default AppLayout

@@ -10,7 +10,9 @@ using TeachShare.Core.Iservices;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
-
+using TeachShare.Core.Settings;
+using Microsoft.Extensions.Options;
+using TeachShare.Core;
 namespace TeachShare.Service.Services
 {
     public class UserService : IUserService
@@ -18,127 +20,145 @@ namespace TeachShare.Service.Services
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
-        public UserService(IRepositoryManager repository, IMapper mapper, IConfiguration configuration)
+        private readonly JwtSettings _jwtSettings;
+
+        public UserService(IRepositoryManager repository, IMapper mapper, IConfiguration configuration, IOptions<JwtSettings> settings)
         {
             _repositoryManager = repository;
             _mapper = mapper;
             _configuration = configuration;
+            _jwtSettings = settings.Value;
         }
 
 
-        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+        public async Task<PagedResult<UserDto>> GetUsersAsync(int page, int pageSize, string? searchTerm)
         {
-            var users = await _repositoryManager.UserRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<UserDTO>>(users);
+            var (users, totalCount) = await _repositoryManager.UserRepository.GetUsersAsync(page, pageSize, searchTerm);
+
+            return new PagedResult<UserDto>
+            {
+                Data = users,
+                Pagination = new PaginationInfo
+                {
+                    Page = page,
+                    Limit = pageSize,
+                    Total = totalCount,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+                }
+            };
         }
 
-        public async Task<UserDTO> GetUserByIdAsync(int userId)
+
+        public async Task<UserDto> GetUserByIdAsync(int userId)
         {
             var user = await _repositoryManager.UserRepository.GetByIdAsync(userId);
-            return _mapper.Map<UserDTO>(user);
+            return _mapper.Map<UserDto>(user);
         }
 
-        public async Task<UserDTO> CreateUserAsync(User user)
+        public async Task<UserDto> CreateUserAsync(UserDto userDto)
         {
-            var userEntity = _mapper.Map<User>(user);
-
-            var userEntityAdded = await _repositoryManager.UserRepository.AddAsync(userEntity);
-            await _repositoryManager.SaveAsync();
-            return _mapper.Map<UserDTO>(userEntityAdded);
-
-        }
-        public async Task<UserDTO> UpdateUserAsync(UserDTO userDto)
-        {
-            var existingUser = await _repositoryManager.UserRepository.GetByIdAsync(userDto.Id);
-            if (existingUser == null) throw new Exception("User not found");
-
-            var userEntity = _mapper.Map<User>(userDto);
-            await _repositoryManager.UserRepository.UpdateAsync(existingUser.Id, userEntity);
-            await _repositoryManager.SaveAsync();
-            return _mapper.Map<UserDTO>(userEntity);
-        }
-
-        public async Task<bool> DeleteUserAsync(int userId)
-        {
-            var user = await _repositoryManager.UserRepository.GetByIdAsync(userId);
-            if (user != null)
+            if (userDto == null ||
+                string.IsNullOrWhiteSpace(userDto.Email) ||
+                string.IsNullOrWhiteSpace(userDto.PasswordHash) ||
+                string.IsNullOrWhiteSpace(userDto.FirstName) ||
+                string.IsNullOrWhiteSpace(userDto.LastName))
             {
-                await _repositoryManager.UserRepository.DeleteAsync(userId);
-                await _repositoryManager.SaveAsync();
-                return true;
-            }
-            return false;
-
-        }
-
-        public async Task<(string Token, UserDTO User)> LoginAsync(LoginDTO loginDTO)
-        {
-            if (loginDTO == null || string.IsNullOrWhiteSpace(loginDTO.Email) || string.IsNullOrWhiteSpace(loginDTO.PasswordHash))//צריך לבדוק על הכל הפרטים?
-            {
-                throw new ArgumentException("Email and password are required.");
-            }
-            var user = (await _repositoryManager.UserRepository.GetAllAsync()).FirstOrDefault(u => u.Email == loginDTO.Email);
-
-            if (user == null || !VerifyPassword(user.PasswordHash, loginDTO.PasswordHash))
-            {
-                throw new ArgumentException("Invalid login data.");
+                throw new ArgumentException("Missing required fields.");
             }
 
-            // כאן נבצע קריאה ל-API או מסד נתונים כדי לבדוק את המידע
-            // לדוגמה, נניח שיש לנו פונקציה בשם AuthenticateUserAsync
-            // var token = await AuthenticateUserAsync(loginDTO.Username, loginDTO.Password);
-
-            //if (string.IsNullOrEmpty(token))
-            //{
-            //    throw new UnauthorizedAccessException("Invalid username or password.");
-            //}
-
-            var token = GenerateJwtToken(user);
-
-            // החזרת טוקן ופרטי משתמש
-            return (Token: token, User: _mapper.Map<UserDTO>(user));
-        }
-
-        public async Task<(string Token, UserDTO User)> RegisterAsync(UserDTO userDTO)
-        {
-            // 1. בדיקת נתונים חובה
-            if (userDTO == null || string.IsNullOrWhiteSpace(userDTO.Email) || string.IsNullOrWhiteSpace(userDTO.PasswordHash))//צריך לבדוק על הכל הפרטים?
-            {
-                throw new ArgumentException("Email and password are required.");
-            }
-
-            // 2. בדיקת פורמט של אי-מייל
-            if (!IsValidEmail(userDTO.Email))
+            if (!IsValidEmail(userDto.Email))
             {
                 throw new ArgumentException("Invalid email format.");
             }
 
-            // 3. בדיקת חוזק סיסמה
-            //if (!IsStrongPassword(userDTO.Password))
-            //{
-            //    throw new ArgumentException("Password does not meet complexity requirements.");
-            //}
+            var exists = (await _repositoryManager.UserRepository.GetAllAsync())
+                         .Any(u => u.Email == userDto.Email);
 
-            // 4. בדיקת ייחודיות של המשתמש
-            var existingUser = (await _repositoryManager.UserRepository.GetAllAsync()).ToList().Any(u => u.Email == userDTO.Email);
-
-            if (existingUser)
+            if (exists)
             {
                 throw new ArgumentException("User already exists.");
             }
 
-            var newUser = _mapper.Map<User>(userDTO);
-            // 5. הצפנת סיסמה
-            newUser.PasswordHash = HashPassword(userDTO.PasswordHash);
+            var newUser = _mapper.Map<User>(userDto);
+            newUser.PasswordHash = HashPassword(userDto.PasswordHash);
+            newUser.CreatedAt = DateTime.UtcNow;
 
-            // 6. שמירה בבסיס נתונים
-            var user = await CreateUserAsync(newUser);
-            // await _repositoryManager.SaveAsync();
-            var token = GenerateJwtToken(newUser);
 
-            // החזרת טוקן ופרטי משתמש
-            return (Token: token, User: _mapper.Map<UserDTO>(newUser));
+            var userEntityAdded = await _repositoryManager.UserRepository.AddAsync(newUser);
+            await _repositoryManager.SaveAsync();
+            return _mapper.Map<UserDto>(userEntityAdded);
+
         }
+        public async Task<UserDto> UpdateUserAsync(UserDto userDto)
+        {
+
+            var existingUser = await _repositoryManager.UserRepository.GetByIdAsync(userDto.Id);
+            if (existingUser == null) throw new Exception("User not found");
+            existingUser.FirstName = userDto.FirstName;
+            existingUser.LastName = userDto.LastName;
+            existingUser.Email = userDto.Email;
+            existingUser.Role = userDto.Role;
+            existingUser.IsActive = userDto.IsActive;
+            if (userDto.PasswordHash != null && userDto.PasswordHash != "")
+                existingUser.PasswordHash = HashPassword(userDto.PasswordHash);
+
+            await _repositoryManager.UserRepository.UpdateAsync(existingUser.Id, existingUser);
+            await _repositoryManager.SaveAsync();
+            return _mapper.Map<UserDto>(existingUser);
+        }
+
+        public async Task<bool> DeleteUserAsync(int userId)
+        {
+            var entity = await _repositoryManager.UserRepository.GetByIdAsync(userId);
+            if (entity == null) return false;
+
+            entity.IsDeleted = true;
+            await _repositoryManager.SaveAsync();
+            return true;
+        }
+
+
+        public async Task<(string Token, UserDto User)> LoginAsync(LoginDTO loginDTO)
+        {
+            if (loginDTO == null ||
+                string.IsNullOrWhiteSpace(loginDTO.Email) ||
+                string.IsNullOrWhiteSpace(loginDTO.PasswordHash))
+            {
+                throw new ArgumentException("Email and password are required.");
+            }
+
+            var user = await _repositoryManager.UserRepository.GetByEmailAsync(loginDTO.Email);
+
+            if (user == null || !VerifyPassword(user.PasswordHash, loginDTO.PasswordHash))
+            {
+                throw new UnauthorizedAccessException("Email or password is incorrect.");
+            }
+
+            if (!user.IsActive)
+            {
+                throw new UnauthorizedAccessException("This account is disabled.");
+            }
+
+            user.LastLogin = DateTime.UtcNow;
+            await _repositoryManager.UserRepository.UpdateAsync(user.Id, user);
+            await _repositoryManager.SaveAsync();
+
+            var userDto = _mapper.Map<UserDto>(user);
+
+            var token = GenerateJwtToken(userDto);
+
+            return (token, userDto);
+        }
+
+
+        public async Task<(string Token, UserDto User)> RegisterAsync(UserDto userDto)
+        {
+            var createdUser = await CreateUserAsync(userDto);
+            var token = GenerateJwtToken(createdUser);
+
+            return (token, createdUser);
+        }
+
 
         private bool IsValidEmail(string email)
         {
@@ -164,27 +184,29 @@ namespace TeachShare.Service.Services
                 return builder.ToString();
             }
         }
-        public string GenerateJwtToken(User user)
+        public string GenerateJwtToken(UserDto user)
         {
-            var claims = new List<Claim>()
+            var claims = new[]
             {
-                 new Claim(ClaimTypes.Name, user.Username), // משתמש בשם המשתמש מהאובייקט UserDTO
-                  new Claim(ClaimTypes.Email, user.Email) // הוספת מייל מהאובייקט UserDTO
-        
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.FirstName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role) // ✳️ זה חשוב
             };
 
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));
-            var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-            var tokenOptions = new JwtSecurityToken(
-                issuer: _configuration["JWT:Issuer"],
-                audience: _configuration["JWT:Audience"],
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var token = new JwtSecurityToken(
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(30), // תאריך תפוגה של 30 דקות
-                signingCredentials: signinCredentials
+                expires: DateTime.Now.AddDays(7),
+                signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(tokenOptions); // החזרת הטוקן
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
 
     }
 }

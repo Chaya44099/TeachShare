@@ -52,7 +52,7 @@ namespace TeachShare.Core.DTOs
         public DateTime RatingDate { get; set; }
 
         public virtual MaterialDTO Material { get; set; }
-        public virtual UserDTO User { get; set; }
+        public virtual UserDto User { get; set; }
     }
 
 }

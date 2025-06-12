@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Auth0.ManagementApi" Version="7.37.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.415.26" />
     <PackageReference Include="Colosoft.Data.EntityFrameworkCore.Pomelo.MySql" Version="3.0.0-beta.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />

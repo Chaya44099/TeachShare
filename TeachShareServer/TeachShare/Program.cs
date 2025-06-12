@@ -19,9 +19,13 @@ using Amazon;
 using Amazon.Extensions.NETCore.Setup;
 using TeachShare.Data.Seed;
 using TeachShare.Api;
+using TeachShare.Core.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+// Connection String Configuration
 var connectionString = builder.Configuration.GetConnectionString("TeachShare");
 
 // DataContext Configuration
@@ -36,7 +40,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IMetirialRepository, MaterialRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 
-// Dependency Injection for Services
+// 4. תלות לשירותים
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
@@ -44,12 +48,12 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IMaterialService, MaterialService>();
 builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<IRepositoryManager, RepositoryManager>();
-builder.Services.AddScoped<DataSeeder>();
+//builder.Services.AddScoped<DataSeeder>();
 
-// AutoMapper Configuration
+// 5. AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile), typeof(MappingProfilePostModel));
 
-// CORS Configuration - מאפשר קריאות מכל מקור (אפשר לצמצם לפי הצורך)
+// 6. CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
@@ -61,14 +65,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Controllers Configuration
+// 7. Controllers
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
-// Swagger Configuration (רק בסביבת פיתוח)
+// 8. Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -78,9 +82,10 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Name = "Authorization",
-        Description = "Bearer Authentication with JWT Token",
+        Description = "Enter JWT with Bearer format",
         Type = SecuritySchemeType.Http
     });
+
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -97,7 +102,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Authentication Configuration
+// 9. JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -111,13 +116,13 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidAudience = builder.Configuration["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
     };
 });
 
-// AWS Configuration (נשאיר כמו שהיה)
+// 10. AWS S3
 builder.Services.AddDefaultAWSOptions(new AWSOptions
 {
     Credentials = new BasicAWSCredentials(
@@ -130,44 +135,32 @@ builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
 
-// Seeder הרצה בזמן האתחול
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var seeder = services.GetRequiredService<DataSeeder>();
-    await seeder.SeedCategoriesAsync();
-}
+// 11. הפעלת Seed
+//using (var scope = app.Services.CreateScope())
+//{
+//    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+//    await seeder.SeedCategoriesAsync();
+//}
 
-// Swagger רק בסביבת פיתוח
-if (app.Environment.IsDevelopment())
+// 12. Middleware
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "TeachShare API V1");
         c.RoutePrefix = "swagger";
-        c.DocExpansion(DocExpansion.None);
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
     });
 }
 
-// אם תרצי לשרת React סטטית (לדוגמה מתיקיית build), תוסיף את השורות הבאות:
+app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
-// app.UseDefaultFiles();  
-// app.UseStaticFiles();  
-// app.MapFallbackToFile("index.html");
-
-// אחרת פשוט:
-
-app.MapGet("/", () => "TeachShare API is running...");
-
-// Middleware Configuration
 app.UseHttpsRedirection();
-
 app.UseCors("AllowReactApp");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
+

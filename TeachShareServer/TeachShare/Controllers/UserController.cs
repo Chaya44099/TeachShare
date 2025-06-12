@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TeachShare.Api.Entities;
 using TeachShare.Core.DTOs;
 using TeachShare.Core.Iservices;
+using TeachShare.Service.Services;
 
 namespace TeachShare.Api.Controllers
 {
@@ -28,8 +30,8 @@ namespace TeachShare.Api.Controllers
                 return BadRequest("User data is required.");
             }
 
-            var userDto = _mapper.Map<UserDTO>(user);
-            var (token, registeredUser) = await _userService.RegisterAsync(userDto);
+            var UserDto = _mapper.Map<UserDto>(user);
+            var (token, registeredUser) = await _userService.RegisterAsync(UserDto);
 
             if (registeredUser == null)
             {
@@ -50,20 +52,21 @@ namespace TeachShare.Api.Controllers
             if (user == null)
                 return Unauthorized();
 
-            return Ok(new { Token = token,User=user /*User = _mapper.Map<UserPostModel> (user)*/});
+            return Ok(new { Token = token, User = user /*User = _mapper.Map<UserPostModel> (user)*/});
         }
 
         // GET: api/user
+        //[Authorize(Roles = "admin")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
         {
-            var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            var result = await _userService.GetUsersAsync(page, pageSize, search);
+            return Ok(result);
         }
 
         // GET: api/user/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDTO>> GetUserById(int id)
+        public async Task<ActionResult<UserDto>> GetUserById(int id)
         {
             var user = await _userService.GetUserByIdAsync(id);
             if (user == null)
@@ -72,17 +75,22 @@ namespace TeachShare.Api.Controllers
             }
             return Ok(user);
         }
-
-        // PUT: api/user/{id}
-        [HttpPut("{id}")]
-        public async Task<ActionResult<UserDTO>> UpdateUser(int id, UserDTO userDto)
+        [HttpPost]
+        public async Task<ActionResult<UserDto>> CreateUser(UserPostModel userPostModel)
         {
-            if (id != userDto.Id)
-            {
-                return BadRequest("User ID mismatch");
-            }
+            var userDto = _mapper.Map<UserDto>(userPostModel);
+            var createdUser = await _userService.CreateUserAsync(userDto);
+            return Ok(createdUser);
+        }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult<UserDto>> UpdateUser(int id, UserPostModel userPostModel)
+        {
+            var userDto = _mapper.Map<UserDto>(userPostModel);
+            userDto.Id = id;
             var updatedUser = await _userService.UpdateUserAsync(userDto);
+            if (updatedUser == null)
+                return NotFound();
             return Ok(updatedUser);
         }
 

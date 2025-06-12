@@ -12,7 +12,7 @@ namespace TeachShare.Core
     {
         public MappingProfile()
         {
-            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<User, UserDto>().ReverseMap();
             CreateMap<Collection, CollectionDTO>().ReverseMap();
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<Material, MaterialDTO>().ReverseMap();

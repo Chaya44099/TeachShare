@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeachShare.Data;
 
@@ -11,9 +12,11 @@ using TeachShare.Data;
 namespace TeachShare.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250612023055_Cange-user")]
+    partial class Cangeuser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,7 +46,7 @@ namespace TeachShare.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Collection", b =>
@@ -89,7 +92,7 @@ namespace TeachShare.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Collections", (string)null);
+                    b.ToTable("Collections");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Material", b =>
@@ -153,7 +156,7 @@ namespace TeachShare.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Materials", (string)null);
+                    b.ToTable("Materials");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Rating", b =>
@@ -195,7 +198,7 @@ namespace TeachShare.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Tag", b =>
@@ -230,7 +233,7 @@ namespace TeachShare.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags", (string)null);
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.User", b =>
@@ -278,7 +281,7 @@ namespace TeachShare.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("TeachShare.Core.Entities.Collection", b =>

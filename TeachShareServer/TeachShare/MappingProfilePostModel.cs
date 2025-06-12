@@ -9,7 +9,7 @@ namespace TeachShare.Api
     {
         public MappingProfilePostModel()
         {
-            CreateMap<UserDTO, UserPostModel>().ReverseMap();
+            CreateMap<UserDto, UserPostModel>().ReverseMap();
             CreateMap<CollectionDTO, CollectionPostModel>().ReverseMap();
             CreateMap<CollectionDTO, CollectionPutModel>().ReverseMap();
 

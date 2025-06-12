@@ -10,6 +10,7 @@
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Colosoft.Data.EntityFrameworkCore.Pomelo.MySql" Version="3.0.0-beta.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="6.0.0-preview.4.21253.5" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
   </ItemGroup>
 
 </Project>
