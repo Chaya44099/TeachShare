@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
 import type { User } from "../Models/User"
 
-const API_URL = import.meta.env.REACT_APP_API_BASE_URL
+const API_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL
 const apiUrl = `${API_URL}/api/User`;
 
 // const apiUrl = "http://localhost:5103/api/User"
