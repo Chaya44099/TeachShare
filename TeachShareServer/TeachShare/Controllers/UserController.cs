@@ -41,19 +41,29 @@ namespace TeachShare.Api.Controllers
             return Ok(new { Token = token, User = registeredUser/*_mapper.Map<UserPostModel>( registeredUser)*/ });
         }
 
-        // POST: api/user/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO login)
         {
             if (login == null)
                 return BadRequest("User data is required.");
 
-            var (token, user) = await _userService.LoginAsync(login);
-            if (user == null)
-                return Unauthorized();
+            try
+            {
+                var (token, user) = await _userService.LoginAsync(login);
 
-            return Ok(new { Token = token, User = user /*User = _mapper.Map<UserPostModel> (user)*/});
+                if (user == null)
+                    return Unauthorized();
+
+                return Ok(new { Token = token, User = user });
+            }
+            catch (Exception ex)
+            {
+                // לוג שגיאה אם יש לך מערכת לוגים
+                Console.WriteLine($"Login failed: {ex.Message}");
+                return StatusCode(500, "Internal server error during login.");
+            }
         }
+
 
         // GET: api/user
         //[Authorize(Roles = "admin")]
