@@ -31,7 +31,7 @@ interface Particle {
 }
 
 const Home: React.FC = () => {
-  const [mousePosition, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [, setMousePosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const { isAuthenticated, user } = useSelector((state: RootState) => state.auth)
   const navigate = useNavigate()
 
