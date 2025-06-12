@@ -40,7 +40,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IMetirialRepository, MaterialRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 
-// 4. úìåú ìùéøåúéí
+// 4. ÃºÃ¬Ã¥Ãº Ã¬Ã¹Ã©Ã¸Ã¥ÃºÃ©Ã­
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRatingService, RatingService>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
@@ -58,7 +58,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.SetIsOriginAllowed(_ => true)
+        policy.WithOrigins("https://teachshare.onrender.com",
+            "http://localhost:5173")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -135,7 +136,7 @@ builder.Services.AddAWSService<IAmazonS3>();
 
 var app = builder.Build();
 
-// 11. äôòìú Seed
+// 11. Ã¤Ã´Ã²Ã¬Ãº Seed
 //using (var scope = app.Services.CreateScope())
 //{
 //    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
