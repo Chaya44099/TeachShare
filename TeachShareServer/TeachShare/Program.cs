@@ -58,13 +58,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("https://teachshare.onrender.com",
-            "http://localhost:5173")
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
+              .AllowAnyHeader();
     });
 });
+
 
 // 7. Controllers
 builder.Services.AddControllers().AddJsonOptions(options =>
